@@ -1,0 +1,33 @@
+PROJECT NAME: Friends Showdown
+
+OBJECTIVE: Build a real-time multiplayer trivia game where players join
+via a shared link and compete to answer questions the fastest.
+
+CORE FEATURES: - Game Creation: Host generates a unique game URL. -
+Player Join: Players join via link and enter a nickname. - Lobby:
+Waiting room before game starts. - Real-Time Gameplay: Questions
+displayed simultaneously. - Fastest Answer Wins: First correct answer
+scores. - Score Tracking: Live scoreboard updates. - Results Screen:
+Final rankings and winner.
+
+GAME MECHANICS: - Questions sourced from a JSON file. - Each question
+includes prompt, options, and correct answer. - Questions are randomly
+selected each round. - Fixed number of rounds per game session.
+
+SCREENS: - Home Screen (Create / Join Game) - Name Entry Screen - Lobby
+Screen (waiting + share link) - Game Screen (questions + answers) -
+Results Screen
+
+TECH STACK: - Frontend: React (Vite) + Tailwind CSS - Backend: Node.js +
+Express - Real-Time: Socket.IO - State: Redux Toolkit (UI/global),
+TanStack Query (server state)
+
+USER FLOW: 1. Host clicks “Create Game” 2. Backend generates unique game
+ID + URL 3. Host enters lobby and shares link 4. Players join via link
+and set nickname 5. Host starts game 6. Questions broadcast to all
+players 7. First correct answer scores 8. Repeat for all rounds 9. Show
+final leaderboard
+
+DEVELOPMENT APPROACH: - Use Test-Driven Development (TDD) - Frontend
+testing with Vitest - Backend testing with Jest + Supertest - Use Git
+for version control - Track tasks in README.md
