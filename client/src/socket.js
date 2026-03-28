@@ -1,9 +1,7 @@
 import { io } from "socket.io-client";
 import { socketUrl } from "./config";
 
-const socket = io(socketUrl, {
-  autoConnect: true,
+export const socket = io(socketUrl, {
   transports: ["websocket", "polling"],
+  autoConnect: true,
 });
-
-export default socket;

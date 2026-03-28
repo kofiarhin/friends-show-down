@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
-import socket from "../socket";
+import { socket } from "../socket";
 import { setGame, setPlayerId } from "../store/gameSlice";
 import { apiBase } from "../config";
 

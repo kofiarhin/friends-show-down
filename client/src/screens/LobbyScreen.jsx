@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import socket from "../socket";
+import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
 import PlayerList from "../components/PlayerList";
 import ShareLink from "../components/ShareLink";

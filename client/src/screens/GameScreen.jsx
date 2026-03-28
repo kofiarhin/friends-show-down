@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import socket from "../socket";
+import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
 import { setHasAnswered } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
