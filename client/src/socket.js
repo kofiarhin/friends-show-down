@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { socketUrl } from "./config";
 
-const socket = io("/", {
+const socket = io(socketUrl, {
   autoConnect: true,
   transports: ["websocket", "polling"],
 });

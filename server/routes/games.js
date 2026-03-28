@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { createGame, getGame } = require("../store/gameStore");
 const { generateId } = require("../utils/generateId");
+const config = require("../config");
 
 // POST /api/games — create a new game session
 router.post("/", (req, res) => {
@@ -12,8 +13,7 @@ router.post("/", (req, res) => {
 
   createGame(gameId, null); // hostId assigned on socket join
 
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-  const gameUrl = `${clientUrl}/game/${gameId}/join`;
+  const gameUrl = `${config.clientUrl}/game/${gameId}/join`;
 
   return res.status(201).json({ gameId, gameUrl });
 });

@@ -1,11 +1,10 @@
 const express = require("express");
 const cors = require("cors");
+const config = require("./config");
 
 const app = express();
 
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-
-app.use(cors({ origin: clientUrl }));
+app.use(cors({ origin: config.allowedOrigins }));
 app.use(express.json());
 
 app.use("/api/games", require("./routes/games"));

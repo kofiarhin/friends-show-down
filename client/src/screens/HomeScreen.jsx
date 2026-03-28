@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setGame, resetGame } from "../store/gameSlice";
+import { apiBase } from "../config";
 
 async function createGame() {
-  const res = await fetch("/api/games", { method: "POST" });
+  const res = await fetch(`${apiBase}/api/games`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to create game.");
   return res.json();
 }

@@ -3,21 +3,19 @@ const http = require("http");
 const { Server } = require("socket.io");
 const app = require("./app");
 const { initSocket } = require("./socket/index");
-
-const port = process.env.PORT || 3001;
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const config = require("./config");
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: clientUrl,
+    origin: config.allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
 
 initSocket(io);
 
-server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+server.listen(config.port, () => {
+  console.log(`Server listening on port ${config.port}`);
 });

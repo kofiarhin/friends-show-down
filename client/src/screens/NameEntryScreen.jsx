@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import socket from "../socket";
 import { setGame, setPlayerId } from "../store/gameSlice";
+import { apiBase } from "../config";
 
 async function fetchGame(gameId) {
-  const res = await fetch(`/api/games/${gameId}`);
+  const res = await fetch(`${apiBase}/api/games/${gameId}`);
   if (res.status === 404) throw new Error("Game not found.");
   if (res.status === 409) throw new Error("Game already in progress.");
   if (!res.ok) throw new Error("Failed to load game.");
