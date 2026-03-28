@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:client": "npm run test --prefix client",
     "client": "npm run dev --prefix client",
     "server": "nodemon server/server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "start": "node server/server.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/server/**/*.test.js"]
   },
   "keywords": [],
   "author": "",
@@ -17,9 +22,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mongoose": "^9.3.3"
+    "mongoose": "^9.3.3",
+    "nanoid": "^5.1.7",
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
   }
 }

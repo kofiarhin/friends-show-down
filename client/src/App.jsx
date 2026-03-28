@@ -1,21 +1,20 @@
-import { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomeScreen from "./screens/HomeScreen";
+import NameEntryScreen from "./screens/NameEntryScreen";
+import LobbyScreen from "./screens/LobbyScreen";
+import GameScreen from "./screens/GameScreen";
+import ResultsScreen from "./screens/ResultsScreen";
 
-const App = () => {
-  useEffect(() => {
-    const getHealth = async () => {
-      const res = await fetch("http://localhost:5000/api/health");
-      if (!res.ok) {
-        throw new Error("something went wrong");
-      }
-
-      const data = await res.json();
-      console.log({ data });
-    };
-
-    getHealth();
-    6;
-  }, []);
-  return <div>App</div>;
-};
-
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/game/:gameId/join" element={<NameEntryScreen />} />
+        <Route path="/game/:gameId/lobby" element={<LobbyScreen />} />
+        <Route path="/game/:gameId/play" element={<GameScreen />} />
+        <Route path="/game/:gameId/results" element={<ResultsScreen />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

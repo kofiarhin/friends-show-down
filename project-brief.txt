@@ -1,33 +1,57 @@
 PROJECT NAME: Friends Showdown
 
-OBJECTIVE: Build a real-time multiplayer trivia game where players join
-via a shared link and compete to answer questions the fastest.
+OBJECTIVE:
+Build a real-time multiplayer trivia game where players join via a shared link and compete to answer questions as quickly as possible. The first player to click and submit the correct answer wins that question.
 
-CORE FEATURES: - Game Creation: Host generates a unique game URL. -
-Player Join: Players join via link and enter a nickname. - Lobby:
-Waiting room before game starts. - Real-Time Gameplay: Questions
-displayed simultaneously. - Fastest Answer Wins: First correct answer
-scores. - Score Tracking: Live scoreboard updates. - Results Screen:
-Final rankings and winner.
+CORE FEATURES:
+- Game Creation: Host generates a unique game URL.
+- Player Join: Players join via link and enter a nickname.
+- Lobby: Waiting room before the game starts.
+- Real-Time Gameplay: Questions are displayed to all players at the same time.
+- Speed-Based Questions: The first player to submit the correct answer wins the question.
+- Score Tracking: Live scoreboard updates as the session progresses.
+- Results Screen: Final rankings and winner are shown at the end of the session.
 
-GAME MECHANICS: - Questions sourced from a JSON file. - Each question
-includes prompt, options, and correct answer. - Questions are randomly
-selected each round. - Fixed number of rounds per game session.
+GAME MECHANICS:
+- Questions are sourced from a JSON file.
+- Each question includes a prompt, answer options, and one correct answer.
+- Questions are randomly selected for the session.
+- The game session continues until all selected questions have been used.
+- Each player gets one answer submission per question.
+- The first player to submit the correct answer wins that question and gets 1 point.
+- As soon as the first correct answer is received by the server, that question ends for everyone.
+- If no player submits the correct answer before the question timer expires, no one gets a point for that question.
+- After all questions in the session have been played, the final leaderboard is shown.
+- The player with the highest total score at the end wins.
 
-SCREENS: - Home Screen (Create / Join Game) - Name Entry Screen - Lobby
-Screen (waiting + share link) - Game Screen (questions + answers) -
-Results Screen
+SCREENS:
+- Home Screen (Create Game / Join Game)
+- Name Entry Screen
+- Lobby Screen (waiting room + share link)
+- Game Screen (question + answer options + session progress + question result state)
+- Results Screen
 
-TECH STACK: - Frontend: React (Vite) + Tailwind CSS - Backend: Node.js +
-Express - Real-Time: Socket.IO - State: Redux Toolkit (UI/global),
-TanStack Query (server state)
+TECH STACK:
+- Frontend: React (Vite) + Tailwind CSS
+- Backend: Node.js + Express
+- Real-Time: Socket.IO
+- State: Redux Toolkit (UI/global state), TanStack Query (server fetch/mutation state)
 
-USER FLOW: 1. Host clicks “Create Game” 2. Backend generates unique game
-ID + URL 3. Host enters lobby and shares link 4. Players join via link
-and set nickname 5. Host starts game 6. Questions broadcast to all
-players 7. First correct answer scores 8. Repeat for all rounds 9. Show
-final leaderboard
+USER FLOW:
+1. Host clicks “Create Game”
+2. Backend generates a unique game ID and shareable URL
+3. Host enters nickname and goes to the lobby
+4. Players join via link and enter nickname
+5. Host starts the game
+6. A question is broadcast to all players simultaneously
+7. Each player submits one answer for that question
+8. The first correct answer wins the question and scores 1 point
+9. Repeat for each remaining question in the session
+10. After all questions are exhausted, show the final leaderboard and winner
 
-DEVELOPMENT APPROACH: - Use Test-Driven Development (TDD) - Frontend
-testing with Vitest - Backend testing with Jest + Supertest - Use Git
-for version control - Track tasks in README.md
+DEVELOPMENT APPROACH:
+- Use Test-Driven Development (TDD)
+- Frontend testing with Vitest
+- Backend testing with Jest + Supertest
+- Use Git for version control
+- Track tasks in README.md

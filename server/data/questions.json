@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q1",
+    "prompt": "What is the capital of France?",
+    "options": ["Berlin", "Madrid", "Paris", "Rome"],
+    "correctAnswer": "Paris"
+  },
+  {
+    "id": "q2",
+    "prompt": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+    "correctAnswer": "Mars"
+  },
+  {
+    "id": "q3",
+    "prompt": "How many sides does a hexagon have?",
+    "options": ["5", "6", "7", "8"],
+    "correctAnswer": "6"
+  },
+  {
+    "id": "q4",
+    "prompt": "What is the largest ocean on Earth?",
+    "options": ["Atlantic", "Indian", "Arctic", "Pacific"],
+    "correctAnswer": "Pacific"
+  },
+  {
+    "id": "q5",
+    "prompt": "Who wrote Romeo and Juliet?",
+    "options": ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+    "correctAnswer": "William Shakespeare"
+  },
+  {
+    "id": "q6",
+    "prompt": "What is the chemical symbol for gold?",
+    "options": ["Go", "Gd", "Au", "Ag"],
+    "correctAnswer": "Au"
+  },
+  {
+    "id": "q7",
+    "prompt": "How many bones are in the adult human body?",
+    "options": ["196", "206", "216", "226"],
+    "correctAnswer": "206"
+  },
+  {
+    "id": "q8",
+    "prompt": "Which country invented pizza?",
+    "options": ["Greece", "Spain", "France", "Italy"],
+    "correctAnswer": "Italy"
+  },
+  {
+    "id": "q9",
+    "prompt": "What is the fastest land animal?",
+    "options": ["Lion", "Cheetah", "Greyhound", "Pronghorn"],
+    "correctAnswer": "Cheetah"
+  },
+  {
+    "id": "q10",
+    "prompt": "In what year did World War II end?",
+    "options": ["1943", "1944", "1945", "1946"],
+    "correctAnswer": "1945"
+  }
+]
