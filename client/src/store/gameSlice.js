@@ -10,6 +10,9 @@ const initialState = {
   players: [],
   currentQuestion: null, // { questionNumber, totalQuestions, question, timeLimit }
   lastQuestionResult: null, // { winnerId, winnerNickname, correctAnswer, scores }
+  roundPhase: null,          // "question_live" | "question_result" | "question_hype" | null
+  phaseStartedAt: null,
+  phaseEndsAt: null,
   hasAnswered: false,
   playState: "running",      // "running" | "paused"
   endReason: null,           // "completed" | "host_ended" | null
@@ -57,14 +60,26 @@ const gameSlice = createSlice({
       state.currentQuestion = action.payload;
       state.hasAnswered = false;
       state.lastQuestionResult = null;
+      state.roundPhase = action.payload?.roundPhase ?? "question_live";
+      state.phaseStartedAt = action.payload?.phaseStartedAt ?? null;
+      state.phaseEndsAt = null;
       state.playState = "running";
       state.startError = null;
     },
     setQuestionResult(state, action) {
       state.lastQuestionResult = action.payload;
+      state.roundPhase = action.payload?.roundPhase ?? "question_result";
+      state.phaseStartedAt = action.payload?.phaseStartedAt ?? null;
+      state.phaseEndsAt = null;
       if (action.payload?.scores) {
         state.players = action.payload.scores;
       }
+    },
+    setRoundPhase(state, action) {
+      const { roundPhase, phaseStartedAt = null, phaseEndsAt = null } = action.payload;
+      state.roundPhase = roundPhase;
+      state.phaseStartedAt = phaseStartedAt;
+      state.phaseEndsAt = phaseEndsAt;
     },
     setHasAnswered(state, action) {
       state.hasAnswered = action.payload;
@@ -84,6 +99,7 @@ const gameSlice = createSlice({
         state.currentQuestion = { ...state.currentQuestion, timeLimit: action.payload };
       }
       state.playState = "running";
+      state.roundPhase = "question_live";
     },
     resetRound(state) {
       return {
@@ -111,6 +127,7 @@ export const {
   updateScores,
   setCurrentQuestion,
   setQuestionResult,
+  setRoundPhase,
   setHasAnswered,
   setPlayState,
   setEndReason,

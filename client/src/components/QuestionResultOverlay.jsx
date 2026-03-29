@@ -1,7 +1,25 @@
 import MiniLeaderboard from "./MiniLeaderboard";
+import { useEffect, useState } from "react";
 
-export default function QuestionResultOverlay({ result }) {
+export default function QuestionResultOverlay({ result, roundPhase, phaseEndsAt }) {
   const { winnerNickname, correctAnswer, scores } = result;
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    if (roundPhase !== "question_hype" || !phaseEndsAt) {
+      setCountdown(0);
+      return;
+    }
+
+    const updateCountdown = () => {
+      const remainingMs = Math.max(0, phaseEndsAt - Date.now());
+      setCountdown(Math.max(1, Math.ceil(remainingMs / 1000)));
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 100);
+    return () => clearInterval(interval);
+  }, [roundPhase, phaseEndsAt]);
 
   return (
     <div className="absolute inset-0 bg-gray-950/90 flex flex-col items-center justify-center gap-6 px-4 z-10">
@@ -32,7 +50,14 @@ export default function QuestionResultOverlay({ result }) {
         <MiniLeaderboard scores={scores} />
       </div>
 
-      <p className="text-gray-500 text-sm">Next question coming up…</p>
+      {roundPhase === "question_hype" ? (
+        <div className="text-center">
+          <p className="text-indigo-300 text-lg font-semibold">Get ready…</p>
+          <p className="text-4xl font-black text-white mt-1">{countdown}</p>
+        </div>
+      ) : (
+        <p className="text-gray-500 text-sm">Next question coming up…</p>
+      )}
     </div>
   );
 }

@@ -55,6 +55,12 @@ describe("questionHandlers logic", () => {
     expect(game.questionAnswered).toBe(true);
   });
 
+  it("rejects answer when roundPhase is not question_live", () => {
+    const game = setupGame();
+    game.roundPhase = "question_hype";
+    expect(game.roundPhase).not.toBe("question_live");
+  });
+
   it("correct answer increments score and marks questionAnswered", () => {
     const game = setupGame();
     const q = game.session.questions[game.session.current];

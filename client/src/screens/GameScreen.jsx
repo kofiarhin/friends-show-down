@@ -12,7 +12,16 @@ export default function GameScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { currentQuestion, lastQuestionResult, hasAnswered, nickname, isHost, playState } =
+  const {
+    currentQuestion,
+    lastQuestionResult,
+    hasAnswered,
+    nickname,
+    isHost,
+    playState,
+    roundPhase,
+    phaseEndsAt,
+  } =
     useSelector((s) => s.game);
 
   useSocketEvents(gameId);
@@ -24,7 +33,7 @@ export default function GameScreen() {
   }, [nickname, gameId, navigate]);
 
   function handleAnswer(option) {
-    if (hasAnswered || playState === "paused") return;
+    if (hasAnswered || playState === "paused" || roundPhase !== "question_live") return;
     dispatch(setHasAnswered(true));
     socket.emit("answer:submit", {
       gameId,
@@ -44,7 +53,7 @@ export default function GameScreen() {
   const { questionNumber, totalQuestions, question, timeLimit } = currentQuestion;
   // Key forces CountdownTimer to remount when question changes or when resumed (timeLimit updates)
   const timerKey = `${questionNumber}-${timeLimit}`;
-  const answersDisabled = hasAnswered || playState === "paused";
+  const answersDisabled = hasAnswered || playState === "paused" || roundPhase !== "question_live";
 
   return (
     <div className="relative min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
@@ -61,7 +70,11 @@ export default function GameScreen() {
       )}
 
       {lastQuestionResult && (
-        <QuestionResultOverlay result={lastQuestionResult} />
+        <QuestionResultOverlay
+          result={lastQuestionResult}
+          roundPhase={roundPhase}
+          phaseEndsAt={phaseEndsAt}
+        />
       )}
 
       <div className="w-full max-w-md flex flex-col gap-6">

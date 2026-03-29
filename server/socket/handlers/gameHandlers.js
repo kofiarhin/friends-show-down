@@ -13,6 +13,7 @@ const { getQuestionsByGenre, MIN_QUESTIONS_PER_GENRE, isValidGenre } = require("
 
 const WAITING_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 const ENDED_EXPIRY_MS = 15 * 60 * 1000;   // 15 min
+const ROUND_TRANSITION_MS = parseInt(process.env.ROUND_TRANSITION_MS, 10) || 3000;
 
 function registerGameHandlers(io, socket) {
   // game:join — player registers in a session
@@ -37,13 +38,21 @@ function registerGameHandlers(io, socket) {
         socket.join(gameId);
         io.to(gameId).emit("players:updated", { players: sanitizePlayers(game.players) });
 
+        if (game.roundPhase === "question_hype") {
+          emitHypePhase(socket, game, gameId);
+          return;
+        }
+
         if (game.currentQuestion && !game.questionAnswered) {
           const timeLimit = parseInt(process.env.QUESTION_TIME_LIMIT) || 20;
           socket.emit("question:start", {
+            gameCode: gameId,
             questionNumber: game.session.current + 1,
             totalQuestions: game.session.totalQuestions,
             question: game.currentQuestion,
             timeLimit,
+            roundPhase: game.roundPhase || "question_live",
+            phaseStartedAt: game.phaseStartedAt,
           });
           if (game.playState === "paused") {
             socket.emit("game:paused", { remainingTimeMs: game.remainingTimeMs });
@@ -182,6 +191,9 @@ function registerGameHandlers(io, socket) {
     game.status = "ended";
     game.playState = "running";
     game.remainingTimeMs = null;
+    game.roundPhase = null;
+    game.phaseStartedAt = null;
+    game.phaseEndsAt = null;
     game.endReason = "host_ended";
     game.lastRoundResults = {
       scores: game.players.map(p => ({ ...p })),
@@ -210,6 +222,10 @@ function registerGameHandlers(io, socket) {
     game.session = { questions: [], current: 0, totalQuestions: 0 };
     game.currentQuestion = null;
     game.questionAnswered = false;
+    game.lastQuestionResult = null;
+    game.roundPhase = null;
+    game.phaseStartedAt = null;
+    game.phaseEndsAt = null;
     game.questionSubmissions = new Set();
     game.questionTimer = null;
     game.transitionTimer = null;
@@ -257,7 +273,9 @@ function registerGameHandlers(io, socket) {
     if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
     if (game.status !== "in-progress") return socket.emit("action:error", { message: "Game is not in progress." });
     if (game.playState === "paused") return; // silently ignore
-    if (game.questionAnswered) return socket.emit("action:error", { message: "Cannot pause between questions." });
+    if (game.roundPhase !== "question_live" || game.questionAnswered) {
+      return socket.emit("action:error", { message: "Cannot pause between questions." });
+    }
 
     const timeLimit = parseInt(process.env.QUESTION_TIME_LIMIT) || 20;
     const elapsed = Date.now() - game.questionStartedAt;
@@ -311,18 +329,25 @@ function emitQuestion(io, gameId) {
 
   game.currentQuestion = questionForClient;
   game.questionAnswered = false;
+  game.lastQuestionResult = null;
   game.questionSubmissions = new Set();
   game.questionStartedAt = Date.now();
+  game.roundPhase = "question_live";
+  game.phaseStartedAt = game.questionStartedAt;
+  game.phaseEndsAt = null;
   game.playState = "running";
   game.remainingTimeMs = null;
 
   const timeLimit = parseInt(process.env.QUESTION_TIME_LIMIT) || 20;
 
   io.to(gameId).emit("question:start", {
+    gameCode: gameId,
     questionNumber: game.session.current + 1,
     totalQuestions: game.session.totalQuestions,
     question: questionForClient,
     timeLimit,
+    roundPhase: "question_live",
+    phaseStartedAt: game.phaseStartedAt,
   });
 
   game.questionTimer = setTimeout(() => {
@@ -343,15 +368,29 @@ function endQuestion(io, gameId, winnerId, winnerNickname) {
   }
 
   game.questionAnswered = true;
+  game.roundPhase = "question_result";
+  game.phaseStartedAt = Date.now();
+  game.phaseEndsAt = null;
 
   const q = game.session.questions[game.session.current];
+  const questionNumber = game.session.current + 1;
+  const totalQuestions = game.session.totalQuestions;
+  game.lastQuestionResult = {
+    winnerId,
+    winnerNickname,
+    correctAnswer: q.correctAnswer,
+  };
 
   io.to(gameId).emit("question:end", {
-    questionNumber: game.session.current + 1,
+    gameCode: gameId,
+    questionNumber,
+    totalQuestions,
     winnerId,
     winnerNickname,
     correctAnswer: q.correctAnswer,
     scores: sanitizePlayers(game.players),
+    roundPhase: "question_result",
+    phaseStartedAt: game.phaseStartedAt,
   });
 
   game.transitionTimer = setTimeout(() => {
@@ -365,6 +404,9 @@ function endQuestion(io, gameId, winnerId, winnerNickname) {
     } else {
       const { winnerId: finalWinnerId, winnerNickname: finalWinnerNickname } = computeWinner(g.players);
       g.status = "ended";
+      g.roundPhase = null;
+      g.phaseStartedAt = null;
+      g.phaseEndsAt = null;
       g.endReason = "completed";
       g.lastRoundResults = {
         scores: g.players.map(p => ({ ...p })),
@@ -378,7 +420,38 @@ function endQuestion(io, gameId, winnerId, winnerNickname) {
         deleteGame(gameId);
       });
     }
-  }, 3000);
+  }, ROUND_TRANSITION_MS);
+
+  if (game.session.current < game.session.totalQuestions - 1) {
+    game.roundPhase = "question_hype";
+    game.phaseStartedAt = Date.now();
+    game.phaseEndsAt = game.phaseStartedAt + ROUND_TRANSITION_MS;
+    io.to(gameId).emit("round:phase", buildHypePayload(game, gameId));
+  }
+}
+
+function emitHypePhase(target, game, gameId) {
+  if (game.roundPhase !== "question_hype") return;
+  target.emit("round:phase", buildHypePayload(game, gameId));
+}
+
+function buildHypePayload(game, gameId) {
+  return {
+    gameCode: gameId,
+    roundPhase: "question_hype",
+    questionNumber: game.session.current + 2,
+    totalQuestions: game.session.totalQuestions,
+    phaseStartedAt: game.phaseStartedAt,
+    phaseEndsAt: game.phaseEndsAt,
+    durationMs: ROUND_TRANSITION_MS,
+    lastResult: game.lastQuestionResult
+      ? {
+        winner: game.lastQuestionResult.winnerNickname,
+        winnerId: game.lastQuestionResult.winnerId,
+        correctAnswer: game.lastQuestionResult.correctAnswer,
+      }
+      : null,
+  };
 }
 
 function computeWinner(players) {

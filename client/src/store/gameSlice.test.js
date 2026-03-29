@@ -8,6 +8,7 @@ import reducer, {
   updateScores,
   setCurrentQuestion,
   setQuestionResult,
+  setRoundPhase,
   setHasAnswered,
   resetGame,
 } from "./gameSlice";
@@ -18,10 +19,18 @@ const initial = {
   nickname: null,
   isHost: false,
   status: "idle",
+  genre: null,
   players: [],
   currentQuestion: null,
   lastQuestionResult: null,
+  roundPhase: null,
+  phaseStartedAt: null,
+  phaseEndsAt: null,
   hasAnswered: false,
+  playState: "running",
+  endReason: null,
+  lastRoundResults: null,
+  startError: null,
 };
 
 describe("gameSlice", () => {
@@ -90,6 +99,30 @@ describe("gameSlice", () => {
     const state = reducer(undefined, setQuestionResult(result));
     expect(state.lastQuestionResult).toEqual(result);
     expect(state.players[0].score).toBe(1);
+    expect(state.roundPhase).toBe("question_result");
+  });
+
+  it("setRoundPhase stores hype phase timing", () => {
+    const payload = {
+      roundPhase: "question_hype",
+      phaseStartedAt: 1000,
+      phaseEndsAt: 4000,
+    };
+    const state = reducer(undefined, setRoundPhase(payload));
+    expect(state.roundPhase).toBe("question_hype");
+    expect(state.phaseStartedAt).toBe(1000);
+    expect(state.phaseEndsAt).toBe(4000);
+  });
+
+  it("question:start payload clears hype state", () => {
+    const hypeState = reducer(
+      undefined,
+      setRoundPhase({ roundPhase: "question_hype", phaseStartedAt: 1000, phaseEndsAt: 4000 })
+    );
+    const q = { questionNumber: 2, totalQuestions: 5, question: {}, timeLimit: 20, roundPhase: "question_live" };
+    const state = reducer(hypeState, setCurrentQuestion(q));
+    expect(state.roundPhase).toBe("question_live");
+    expect(state.phaseEndsAt).toBeNull();
   });
 
   it("setHasAnswered sets hasAnswered", () => {

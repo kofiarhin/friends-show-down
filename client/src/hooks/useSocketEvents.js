@@ -8,6 +8,7 @@ import {
   setStatus,
   setCurrentQuestion,
   setQuestionResult,
+  setRoundPhase,
   updateScores,
   setPlayState,
   setEndReason,
@@ -45,6 +46,27 @@ export function useSocketEvents(gameId) {
 
     function onQuestionEnd(payload) {
       dispatch(setQuestionResult(payload));
+    }
+
+    function onRoundPhase(payload) {
+      dispatch(
+        setRoundPhase({
+          roundPhase: payload.roundPhase,
+          phaseStartedAt: payload.phaseStartedAt,
+          phaseEndsAt: payload.phaseEndsAt,
+        })
+      );
+      if (payload.lastResult) {
+        dispatch(
+          setQuestionResult({
+            winnerId: payload.lastResult.winnerId ?? null,
+            winnerNickname: payload.lastResult.winner ?? null,
+            correctAnswer: payload.lastResult.correctAnswer,
+            roundPhase: "question_hype",
+            phaseStartedAt: payload.phaseStartedAt,
+          })
+        );
+      }
     }
 
     function onGameEnd(payload) {
@@ -89,6 +111,7 @@ export function useSocketEvents(gameId) {
     socket.on("players:updated", onPlayersUpdated);
     socket.on("question:start", onQuestionStart);
     socket.on("question:end", onQuestionEnd);
+    socket.on("round:phase", onRoundPhase);
     socket.on("game:end", onGameEnd);
     socket.on("game:closed", onGameClosed);
     socket.on("game:paused", onGamePaused);
@@ -107,6 +130,7 @@ export function useSocketEvents(gameId) {
       socket.off("players:updated", onPlayersUpdated);
       socket.off("question:start", onQuestionStart);
       socket.off("question:end", onQuestionEnd);
+      socket.off("round:phase", onRoundPhase);
       socket.off("game:end", onGameEnd);
       socket.off("game:closed", onGameClosed);
       socket.off("game:paused", onGamePaused);

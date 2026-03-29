@@ -14,6 +14,10 @@ function registerQuestionHandlers(io, socket) {
       return socket.emit("answer:rejected", { reason: "Game is paused." });
     }
 
+    if (game.roundPhase !== "question_live") {
+      return socket.emit("answer:rejected", { reason: "Question is not live." });
+    }
+
     // Question number must match current (1-based)
     if (questionNumber !== game.session.current + 1) {
       return socket.emit("answer:rejected", { reason: "Question already over." });
