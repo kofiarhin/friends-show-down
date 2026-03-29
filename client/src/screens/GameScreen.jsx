@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
@@ -18,11 +18,16 @@ export default function GameScreen() {
     hasAnswered,
     nickname,
     isHost,
+    players,
     playState,
     roundPhase,
     phaseEndsAt,
-  } =
-    useSelector((s) => s.game);
+  } = useSelector((s) => s.game);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [pauseOverlayVisible, setPauseOverlayVisible] = useState(
+    playState === "paused",
+  );
+  const previousScoresRef = useRef(players);
 
   useSocketEvents(gameId);
 
@@ -32,8 +37,42 @@ export default function GameScreen() {
     }
   }, [nickname, gameId, navigate]);
 
+  useEffect(() => {
+    if (!currentQuestion) return;
+    setSelectedAnswer(null);
+  }, [currentQuestion?.questionNumber]);
+
+  useEffect(() => {
+    if (playState === "paused") {
+      setPauseOverlayVisible(true);
+      return;
+    }
+
+    if (!pauseOverlayVisible) return;
+
+    const timeout = setTimeout(() => {
+      setPauseOverlayVisible(false);
+    }, 180);
+
+    return () => clearTimeout(timeout);
+  }, [playState, pauseOverlayVisible]);
+
+  useEffect(() => {
+    if (!lastQuestionResult) {
+      previousScoresRef.current = players;
+    }
+  }, [players, lastQuestionResult]);
+
   function handleAnswer(option) {
-    if (hasAnswered || playState === "paused" || roundPhase !== "question_live") return;
+    if (
+      hasAnswered ||
+      playState === "paused" ||
+      roundPhase !== "question_live"
+    ) {
+      return;
+    }
+
+    setSelectedAnswer(option);
     dispatch(setHasAnswered(true));
     socket.emit("answer:submit", {
       gameId,
@@ -51,15 +90,20 @@ export default function GameScreen() {
   }
 
   const { questionNumber, totalQuestions, question, timeLimit } = currentQuestion;
-  // Key forces CountdownTimer to remount when question changes or when resumed (timeLimit updates)
   const timerKey = `${questionNumber}-${timeLimit}`;
-  const answersDisabled = hasAnswered || playState === "paused" || roundPhase !== "question_live";
+  const questionKey = `${questionNumber}`;
+  const answersDisabled =
+    hasAnswered || playState === "paused" || roundPhase !== "question_live";
+  const isPauseOverlayActive = playState === "paused";
 
   return (
-    <div className="relative min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
-      {/* Paused overlay */}
-      {playState === "paused" && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-sm gap-4">
+    <div className="gameplay-shell relative min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
+      {pauseOverlayVisible && (
+        <div
+          className="pause-overlay absolute inset-0 z-20 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-sm gap-4"
+          data-visible={isPauseOverlayActive}
+          data-testid="pause-overlay"
+        >
           <p className="text-3xl font-bold text-yellow-400">Game Paused</p>
           {isHost ? (
             <HostControls gameId={gameId} />
@@ -74,44 +118,57 @@ export default function GameScreen() {
           result={lastQuestionResult}
           roundPhase={roundPhase}
           phaseEndsAt={phaseEndsAt}
+          previousScores={previousScoresRef.current}
         />
       )}
 
-      <div className="w-full max-w-md flex flex-col gap-6">
-        {/* Host controls (running state only) */}
+      <div
+        className="gameplay-content w-full max-w-md flex flex-col gap-6"
+        data-paused={isPauseOverlayActive}
+      >
         {isHost && playState === "running" && (
           <div className="flex justify-end">
             <HostControls gameId={gameId} />
           </div>
         )}
 
-        {/* Session progress */}
-        <div className="text-center">
-          <p className="text-sm text-gray-400 uppercase tracking-widest">
-            Question {questionNumber} of {totalQuestions}
-          </p>
-        </div>
+        <div key={questionKey} className="question-stage flex flex-col gap-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-400 uppercase tracking-widest">
+              Question {questionNumber} of {totalQuestions}
+            </p>
+          </div>
 
-        {/* Timer */}
-        <CountdownTimer key={timerKey} timeLimit={timeLimit} />
+          <CountdownTimer key={timerKey} timeLimit={timeLimit} />
 
-        {/* Question */}
-        <div className="bg-gray-800 rounded-2xl px-6 py-8 text-center">
-          <p className="text-xl font-semibold leading-snug">{question.prompt}</p>
-        </div>
+          <div className="question-card bg-gray-800 rounded-2xl px-6 py-8 text-center">
+            <p className="text-xl font-semibold leading-snug">{question.prompt}</p>
+          </div>
 
-        {/* Answer options */}
-        <div className="grid grid-cols-2 gap-3">
-          {question.options.map((opt) => (
-            <button
-              key={opt}
-              onClick={() => handleAnswer(opt)}
-              disabled={answersDisabled}
-              className="py-4 px-3 rounded-xl bg-gray-700 hover:bg-indigo-600 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              {opt}
-            </button>
-          ))}
+          <div className="answer-grid grid grid-cols-2 gap-3">
+            {question.options.map((opt, index) => {
+              const answerState =
+                selectedAnswer === opt
+                  ? "selected"
+                  : hasAnswered
+                    ? "locked"
+                    : "idle";
+
+              return (
+                <button
+                  key={opt}
+                  onClick={() => handleAnswer(opt)}
+                  disabled={answersDisabled}
+                  data-answer-state={answerState}
+                  data-question-live={roundPhase === "question_live"}
+                  className="game-answer-button py-4 px-3 rounded-xl bg-gray-700 hover:bg-indigo-600 font-medium text-sm disabled:cursor-not-allowed"
+                  style={{ "--answer-index": index }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {hasAnswered && !lastQuestionResult && (

@@ -39,7 +39,10 @@ describe("gameSlice", () => {
   });
 
   it("setGame updates gameId, nickname, isHost", () => {
-    const state = reducer(undefined, setGame({ gameId: "abc", nickname: "Alice", isHost: true }));
+    const state = reducer(
+      undefined,
+      setGame({ gameId: "abc", nickname: "Alice", isHost: true }),
+    );
     expect(state.gameId).toBe("abc");
     expect(state.nickname).toBe("Alice");
     expect(state.isHost).toBe(true);
@@ -56,14 +59,24 @@ describe("gameSlice", () => {
   });
 
   it("setPlayers replaces player list", () => {
-    const players = [{ playerId: "p1", nickname: "Alice", score: 0, connected: true }];
+    const players = [
+      { playerId: "p1", nickname: "Alice", score: 0, connected: true },
+    ];
     const state = reducer(undefined, setPlayers(players));
     expect(state.players).toHaveLength(1);
   });
 
   it("addPlayer appends a player", () => {
-    const s1 = reducer(undefined, setPlayers([{ playerId: "p1", nickname: "A", score: 0, connected: true }]));
-    const s2 = reducer(s1, addPlayer({ playerId: "p2", nickname: "B", score: 0, connected: true }));
+    const s1 = reducer(
+      undefined,
+      setPlayers([
+        { playerId: "p1", nickname: "A", score: 0, connected: true },
+      ]),
+    );
+    const s2 = reducer(
+      s1,
+      addPlayer({ playerId: "p2", nickname: "B", score: 0, connected: true }),
+    );
     expect(s2.players).toHaveLength(2);
   });
 
@@ -75,14 +88,21 @@ describe("gameSlice", () => {
   });
 
   it("updateScores replaces players array", () => {
-    const updated = [{ playerId: "p1", nickname: "A", score: 3, connected: true }];
+    const updated = [
+      { playerId: "p1", nickname: "A", score: 3, connected: true },
+    ];
     const state = reducer(undefined, updateScores(updated));
     expect(state.players[0].score).toBe(3);
   });
 
   it("setCurrentQuestion resets hasAnswered and lastQuestionResult", () => {
     const withAnswer = reducer(undefined, setHasAnswered(true));
-    const q = { questionNumber: 1, totalQuestions: 5, question: {}, timeLimit: 20 };
+    const q = {
+      questionNumber: 1,
+      totalQuestions: 5,
+      question: {},
+      timeLimit: 20,
+    };
     const state = reducer(withAnswer, setCurrentQuestion(q));
     expect(state.hasAnswered).toBe(false);
     expect(state.lastQuestionResult).toBeNull();
@@ -94,12 +114,44 @@ describe("gameSlice", () => {
       winnerId: "p1",
       winnerNickname: "Alice",
       correctAnswer: "Paris",
-      scores: [{ playerId: "p1", nickname: "Alice", score: 1, connected: true }],
+      scores: [
+        { playerId: "p1", nickname: "Alice", score: 1, connected: true },
+      ],
     };
     const state = reducer(undefined, setQuestionResult(result));
     expect(state.lastQuestionResult).toEqual(result);
     expect(state.players[0].score).toBe(1);
     expect(state.roundPhase).toBe("question_result");
+  });
+
+  it("setQuestionResult preserves existing scores when payload omits them", () => {
+    const initialState = reducer(
+      undefined,
+      setQuestionResult({
+        winnerId: "p1",
+        winnerNickname: "Alice",
+        correctAnswer: "Paris",
+        scores: [
+          { playerId: "p1", nickname: "Alice", score: 1, connected: true },
+        ],
+      }),
+    );
+    const state = reducer(
+      initialState,
+      setQuestionResult({
+        winnerId: "p1",
+        winnerNickname: "Alice",
+        correctAnswer: "Paris",
+        roundPhase: "question_hype",
+        phaseStartedAt: 2000,
+      }),
+    );
+
+    expect(state.lastQuestionResult.scores).toEqual(
+      initialState.lastQuestionResult.scores,
+    );
+    expect(state.players).toEqual(initialState.players);
+    expect(state.roundPhase).toBe("question_hype");
   });
 
   it("setRoundPhase stores hype phase timing", () => {
@@ -117,9 +169,19 @@ describe("gameSlice", () => {
   it("question:start payload clears hype state", () => {
     const hypeState = reducer(
       undefined,
-      setRoundPhase({ roundPhase: "question_hype", phaseStartedAt: 1000, phaseEndsAt: 4000 })
+      setRoundPhase({
+        roundPhase: "question_hype",
+        phaseStartedAt: 1000,
+        phaseEndsAt: 4000,
+      }),
     );
-    const q = { questionNumber: 2, totalQuestions: 5, question: {}, timeLimit: 20, roundPhase: "question_live" };
+    const q = {
+      questionNumber: 2,
+      totalQuestions: 5,
+      question: {},
+      timeLimit: 20,
+      roundPhase: "question_live",
+    };
     const state = reducer(hypeState, setCurrentQuestion(q));
     expect(state.roundPhase).toBe("question_live");
     expect(state.phaseEndsAt).toBeNull();
@@ -131,7 +193,10 @@ describe("gameSlice", () => {
   });
 
   it("resetGame returns initial state", () => {
-    const dirty = reducer(undefined, setGame({ gameId: "abc", nickname: "X", isHost: true }));
+    const dirty = reducer(
+      undefined,
+      setGame({ gameId: "abc", nickname: "X", isHost: true }),
+    );
     const reset = reducer(dirty, resetGame());
     expect(reset).toEqual(initial);
   });

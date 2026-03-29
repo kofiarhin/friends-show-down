@@ -1,1 +1,345 @@
 @import "tailwindcss";
+
+:root {
+  --gameplay-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --gameplay-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gameplay-shell {
+  isolation: isolate;
+}
+
+.gameplay-content {
+  transition:
+    filter 180ms var(--gameplay-ease-in-out),
+    transform 180ms var(--gameplay-ease-in-out),
+    opacity 180ms var(--gameplay-ease-in-out);
+}
+
+.gameplay-content[data-paused="true"] {
+  filter: saturate(0.7) brightness(0.9);
+  transform: scale(0.99);
+}
+
+.pause-overlay {
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 180ms var(--gameplay-ease-in-out),
+    transform 180ms var(--gameplay-ease-in-out);
+}
+
+.pause-overlay[data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pause-overlay[data-visible="false"] {
+  opacity: 0;
+  transform: scale(1.01);
+  pointer-events: none;
+}
+
+.question-stage {
+  animation: gameplay-fade-rise 280ms var(--gameplay-ease-out);
+}
+
+.question-card {
+  animation: gameplay-card-pop 320ms var(--gameplay-ease-out);
+}
+
+.answer-grid {
+  contain: layout paint;
+}
+
+.game-answer-button {
+  position: relative;
+  border: 1px solid transparent;
+  box-shadow: 0 0 0 rgba(99, 102, 241, 0);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition:
+    transform 160ms var(--gameplay-ease-out),
+    opacity 160ms var(--gameplay-ease-in-out),
+    background-color 160ms var(--gameplay-ease-in-out),
+    border-color 160ms var(--gameplay-ease-in-out),
+    box-shadow 200ms var(--gameplay-ease-in-out);
+  animation: gameplay-answer-rise 320ms var(--gameplay-ease-out) both;
+  animation-delay: calc(var(--answer-index, 0) * 60ms + 40ms);
+}
+
+.game-answer-button:hover:enabled {
+  transform: translateY(-2px);
+}
+
+.game-answer-button:active:enabled {
+  transform: scale(0.98);
+}
+
+.game-answer-button[data-answer-state="selected"] {
+  background-color: rgba(79, 70, 229, 0.95);
+  border-color: rgba(165, 180, 252, 0.85);
+  box-shadow: 0 0 0 1px rgba(165, 180, 252, 0.5), 0 14px 28px rgba(79, 70, 229, 0.28);
+  animation:
+    gameplay-answer-rise 320ms var(--gameplay-ease-out) both,
+    gameplay-answer-lock 220ms var(--gameplay-ease-out);
+}
+
+.game-answer-button[data-answer-state="locked"] {
+  opacity: 0.5;
+  transform: scale(0.985);
+}
+
+.game-answer-button[data-question-live="false"] {
+  opacity: 0.55;
+}
+
+.countdown-timer {
+  animation: gameplay-fade-rise 260ms var(--gameplay-ease-out);
+}
+
+.countdown-timer__track {
+  transition:
+    box-shadow 180ms var(--gameplay-ease-in-out),
+    transform 180ms var(--gameplay-ease-in-out);
+}
+
+.countdown-timer__value,
+.countdown-timer__fill {
+  transform-origin: center;
+}
+
+.countdown-timer[data-urgency="urgent"] .countdown-timer__value {
+  animation: gameplay-timer-pulse 1s var(--gameplay-ease-in-out) infinite;
+}
+
+.countdown-timer[data-urgency="urgent"] .countdown-timer__track {
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.2), 0 0 24px rgba(250, 204, 21, 0.2);
+}
+
+.countdown-timer[data-urgency="critical"] .countdown-timer__value {
+  color: rgb(248 113 113);
+  animation: gameplay-timer-pulse 650ms var(--gameplay-ease-in-out) infinite;
+}
+
+.countdown-timer[data-urgency="critical"] .countdown-timer__track {
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25), 0 0 30px rgba(248, 113, 113, 0.25);
+  transform: scaleY(1.1);
+}
+
+.countdown-timer[data-urgency="critical"] .countdown-timer__fill {
+  animation: gameplay-critical-glow 650ms ease-in-out infinite;
+}
+
+.question-result-overlay {
+  background: rgba(3, 7, 18, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.question-result-overlay__panel {
+  animation: gameplay-overlay-in 260ms var(--gameplay-ease-out);
+}
+
+.question-result-overlay__copy,
+.question-result-overlay__scores,
+.question-result-overlay__countdown-wrapper,
+.question-result-overlay__next-step {
+  animation: gameplay-fade-rise 260ms var(--gameplay-ease-out);
+}
+
+.question-result-overlay__countdown {
+  animation: gameplay-count-pop 360ms var(--gameplay-ease-out);
+}
+
+.mini-leaderboard__row {
+  transform: translateY(0);
+  animation: gameplay-row-in 260ms var(--gameplay-ease-out) both;
+  animation-delay: calc(var(--leaderboard-index, 0) * 55ms + 80ms);
+  transition:
+    background-color 220ms var(--gameplay-ease-in-out),
+    box-shadow 220ms var(--gameplay-ease-in-out),
+    transform 220ms var(--gameplay-ease-in-out),
+    border-color 220ms var(--gameplay-ease-in-out);
+}
+
+.mini-leaderboard__row[data-highlighted="true"] {
+  background-color: rgba(67, 56, 202, 0.58);
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.45), 0 12px 28px rgba(79, 70, 229, 0.28);
+  animation:
+    gameplay-row-in 260ms var(--gameplay-ease-out) both,
+    gameplay-score-flash 1.2s ease;
+}
+
+.mini-leaderboard__row[data-rank-changed="true"] {
+  transform: translateX(3px);
+}
+
+.mini-leaderboard__row[data-score-changed="true"] .mini-leaderboard__score {
+  animation: gameplay-score-pop 420ms var(--gameplay-ease-out);
+}
+
+@keyframes gameplay-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gameplay-card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gameplay-answer-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gameplay-answer-lock {
+  0% {
+    transform: scale(0.97);
+  }
+
+  60% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes gameplay-timer-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    text-shadow: none;
+  }
+
+  50% {
+    transform: scale(1.08);
+    text-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes gameplay-critical-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.18);
+  }
+}
+
+@keyframes gameplay-overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gameplay-count-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gameplay-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gameplay-score-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.75);
+  }
+
+  40% {
+    box-shadow: 0 0 0 6px rgba(129, 140, 248, 0.15);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(129, 140, 248, 0);
+  }
+}
+
+@keyframes gameplay-score-pop {
+  0% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gameplay-content,
+  .pause-overlay,
+  .question-stage,
+  .question-card,
+  .game-answer-button,
+  .countdown-timer,
+  .question-result-overlay__panel,
+  .question-result-overlay__copy,
+  .question-result-overlay__scores,
+  .question-result-overlay__countdown-wrapper,
+  .question-result-overlay__next-step,
+  .question-result-overlay__countdown,
+  .mini-leaderboard__row,
+  .mini-leaderboard__score,
+  .countdown-timer__value,
+  .countdown-timer__fill {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}

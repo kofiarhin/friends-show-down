@@ -9,11 +9,16 @@ const {
   clearExpiryTimer,
 } = require("../../store/gameStore");
 const { shuffleArray } = require("../../utils/shuffleArray");
-const { getQuestionsByGenre, MIN_QUESTIONS_PER_GENRE, isValidGenre } = require("../../utils/questionBank");
+const {
+  getQuestionsByGenre,
+  MIN_QUESTIONS_PER_GENRE,
+  isValidGenre,
+} = require("../../utils/questionBank");
 
 const WAITING_EXPIRY_MS = 30 * 60 * 1000; // 30 min
-const ENDED_EXPIRY_MS = 15 * 60 * 1000;   // 15 min
-const ROUND_TRANSITION_MS = parseInt(process.env.ROUND_TRANSITION_MS, 10) || 3000;
+const ENDED_EXPIRY_MS = 15 * 60 * 1000; // 15 min
+const ROUND_TRANSITION_MS =
+  parseInt(process.env.ROUND_TRANSITION_MS, 10) || 5000;
 
 function registerGameHandlers(io, socket) {
   // game:join — player registers in a session
@@ -36,7 +41,9 @@ function registerGameHandlers(io, socket) {
         }
 
         socket.join(gameId);
-        io.to(gameId).emit("players:updated", { players: sanitizePlayers(game.players) });
+        io.to(gameId).emit("players:updated", {
+          players: sanitizePlayers(game.players),
+        });
 
         if (game.roundPhase === "question_hype") {
           emitHypePhase(socket, game, gameId);
@@ -55,12 +62,16 @@ function registerGameHandlers(io, socket) {
             phaseStartedAt: game.phaseStartedAt,
           });
           if (game.playState === "paused") {
-            socket.emit("game:paused", { remainingTimeMs: game.remainingTimeMs });
+            socket.emit("game:paused", {
+              remainingTimeMs: game.remainingTimeMs,
+            });
           }
         }
         return;
       }
-      return socket.emit("join:error", { message: "Game already in progress." });
+      return socket.emit("join:error", {
+        message: "Game already in progress.",
+      });
     }
 
     if (game.status === "ended") {
@@ -75,21 +86,34 @@ function registerGameHandlers(io, socket) {
         }
         socket.join(gameId);
         socket.emit("game:end", buildGameEnd(game));
-        io.to(gameId).emit("players:updated", { players: sanitizePlayers(game.players) });
+        io.to(gameId).emit("players:updated", {
+          players: sanitizePlayers(game.players),
+        });
         return;
       } else if (!existing) {
         // New player joining post-game
         const nicknameNormalized = nickname.trim();
         if (!nicknameNormalized || nicknameNormalized.length > 20) {
-          return socket.emit("join:error", { message: "Nickname must be 1–20 characters." });
+          return socket.emit("join:error", {
+            message: "Nickname must be 1–20 characters.",
+          });
         }
-        addPlayer(gameId, { playerId: socket.id, nickname: nicknameNormalized, score: 0, connected: true });
+        addPlayer(gameId, {
+          playerId: socket.id,
+          nickname: nicknameNormalized,
+          score: 0,
+          connected: true,
+        });
         socket.join(gameId);
         socket.emit("game:end", buildGameEnd(game));
-        io.to(gameId).emit("players:updated", { players: sanitizePlayers(game.players) });
+        io.to(gameId).emit("players:updated", {
+          players: sanitizePlayers(game.players),
+        });
         return;
       } else {
-        return socket.emit("join:error", { message: "Nickname already taken." });
+        return socket.emit("join:error", {
+          message: "Nickname already taken.",
+        });
       }
     }
 
@@ -104,13 +128,18 @@ function registerGameHandlers(io, socket) {
       socket.join(gameId);
       clearExpiryTimer(gameId);
       setExpiryTimer(gameId, WAITING_EXPIRY_MS);
-      io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players), genre: game.config.genre });
+      io.to(gameId).emit("lobby:updated", {
+        players: sanitizePlayers(game.players),
+        genre: game.config.genre,
+      });
       return;
     }
 
     const nicknameNormalized = nickname.trim();
     if (!nicknameNormalized || nicknameNormalized.length > 20) {
-      return socket.emit("join:error", { message: "Nickname must be 1–20 characters." });
+      return socket.emit("join:error", {
+        message: "Nickname must be 1–20 characters.",
+      });
     }
 
     if (getPlayerByNickname(gameId, nicknameNormalized)) {
@@ -137,7 +166,10 @@ function registerGameHandlers(io, socket) {
     clearExpiryTimer(gameId);
     setExpiryTimer(gameId, WAITING_EXPIRY_MS);
 
-    io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players), genre: game.config.genre });
+    io.to(gameId).emit("lobby:updated", {
+      players: sanitizePlayers(game.players),
+      genre: game.config.genre,
+    });
   });
 
   // game:start — host starts the game
@@ -172,8 +204,12 @@ function registerGameHandlers(io, socket) {
   // game:end-early — host ends from lobby (cancel) or from in-progress
   socket.on("game:end-early", ({ gameId }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
     if (game.status === "ended") return; // silently ignore
 
     if (game.status === "waiting") {
@@ -184,8 +220,14 @@ function registerGameHandlers(io, socket) {
     }
 
     // In-progress — end early
-    if (game.questionTimer) { clearTimeout(game.questionTimer); game.questionTimer = null; }
-    if (game.transitionTimer) { clearTimeout(game.transitionTimer); game.transitionTimer = null; }
+    if (game.questionTimer) {
+      clearTimeout(game.questionTimer);
+      game.questionTimer = null;
+    }
+    if (game.transitionTimer) {
+      clearTimeout(game.transitionTimer);
+      game.transitionTimer = null;
+    }
 
     const { winnerId, winnerNickname } = computeWinner(game.players);
     game.status = "ended";
@@ -196,7 +238,7 @@ function registerGameHandlers(io, socket) {
     game.phaseEndsAt = null;
     game.endReason = "host_ended";
     game.lastRoundResults = {
-      scores: game.players.map(p => ({ ...p })),
+      scores: game.players.map((p) => ({ ...p })),
       winnerId,
       winnerNickname,
       endReason: "host_ended",
@@ -212,9 +254,16 @@ function registerGameHandlers(io, socket) {
   // game:restart — host restarts a new round in the same room
   socket.on("game:restart", ({ gameId }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
-    if (game.status !== "ended") return socket.emit("action:error", { message: "Can only restart after a round has ended." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
+    if (game.status !== "ended")
+      return socket.emit("action:error", {
+        message: "Can only restart after a round has ended.",
+      });
 
     clearExpiryTimer(gameId);
 
@@ -235,20 +284,32 @@ function registerGameHandlers(io, socket) {
     game.endReason = null;
     game.lastRoundResults = null;
 
-    game.players.forEach(p => { p.score = 0; });
+    game.players.forEach((p) => {
+      p.score = 0;
+    });
     game.status = "waiting";
 
     setExpiryTimer(gameId, WAITING_EXPIRY_MS);
 
-    io.to(gameId).emit("game:restarted", { players: sanitizePlayers(game.players), genre: game.config.genre });
+    io.to(gameId).emit("game:restarted", {
+      players: sanitizePlayers(game.players),
+      genre: game.config.genre,
+    });
   });
 
   // game:close-room — host closes the room from post-game screen
   socket.on("game:close-room", ({ gameId }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
-    if (game.status !== "ended") return socket.emit("action:error", { message: "Can only close room after a round has ended." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
+    if (game.status !== "ended")
+      return socket.emit("action:error", {
+        message: "Can only close room after a round has ended.",
+      });
 
     io.to(gameId).emit("game:closed", { reason: "host_ended" });
     deleteGame(gameId);
@@ -257,10 +318,18 @@ function registerGameHandlers(io, socket) {
   // room:set-genre — host changes genre while room is in ended state
   socket.on("room:set-genre", ({ gameId, genre }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
-    if (game.status !== "ended") return socket.emit("action:error", { message: "Genre can only be changed after a round ends." });
-    if (!isValidGenre(genre)) return socket.emit("action:error", { message: "Invalid genre." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
+    if (game.status !== "ended")
+      return socket.emit("action:error", {
+        message: "Genre can only be changed after a round ends.",
+      });
+    if (!isValidGenre(genre))
+      return socket.emit("action:error", { message: "Invalid genre." });
 
     game.config.genre = genre;
     io.to(gameId).emit("genre:updated", { genre });
@@ -269,12 +338,21 @@ function registerGameHandlers(io, socket) {
   // game:pause — host pauses an active question
   socket.on("game:pause", ({ gameId }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
-    if (game.status !== "in-progress") return socket.emit("action:error", { message: "Game is not in progress." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
+    if (game.status !== "in-progress")
+      return socket.emit("action:error", {
+        message: "Game is not in progress.",
+      });
     if (game.playState === "paused") return; // silently ignore
     if (game.roundPhase !== "question_live" || game.questionAnswered) {
-      return socket.emit("action:error", { message: "Cannot pause between questions." });
+      return socket.emit("action:error", {
+        message: "Cannot pause between questions.",
+      });
     }
 
     const timeLimit = parseInt(process.env.QUESTION_TIME_LIMIT) || 20;
@@ -292,13 +370,23 @@ function registerGameHandlers(io, socket) {
   // game:resume — host resumes a paused question
   socket.on("game:resume", ({ gameId }) => {
     const game = getGame(gameId);
-    if (!game) return socket.emit("action:error", { message: "Game not found." });
-    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
-    if (game.status !== "in-progress") return socket.emit("action:error", { message: "Game is not in progress." });
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId)
+      return socket.emit("action:error", {
+        message: "Only the host can do that.",
+      });
+    if (game.status !== "in-progress")
+      return socket.emit("action:error", {
+        message: "Game is not in progress.",
+      });
     if (game.playState === "running") return; // silently ignore
 
     game.playState = "running";
-    game.questionStartedAt = Date.now() - (((parseInt(process.env.QUESTION_TIME_LIMIT) || 20) * 1000) - game.remainingTimeMs);
+    game.questionStartedAt =
+      Date.now() -
+      ((parseInt(process.env.QUESTION_TIME_LIMIT) || 20) * 1000 -
+        game.remainingTimeMs);
     game.questionTimer = setTimeout(() => {
       const g = getGame(gameId);
       if (g && !g.questionAnswered) {
@@ -402,14 +490,15 @@ function endQuestion(io, gameId, winnerId, winnerNickname) {
       g.session.current += 1;
       emitQuestion(io, gameId);
     } else {
-      const { winnerId: finalWinnerId, winnerNickname: finalWinnerNickname } = computeWinner(g.players);
+      const { winnerId: finalWinnerId, winnerNickname: finalWinnerNickname } =
+        computeWinner(g.players);
       g.status = "ended";
       g.roundPhase = null;
       g.phaseStartedAt = null;
       g.phaseEndsAt = null;
       g.endReason = "completed";
       g.lastRoundResults = {
-        scores: g.players.map(p => ({ ...p })),
+        scores: g.players.map((p) => ({ ...p })),
         winnerId: finalWinnerId,
         winnerNickname: finalWinnerNickname,
         endReason: "completed",
@@ -446,10 +535,10 @@ function buildHypePayload(game, gameId) {
     durationMs: ROUND_TRANSITION_MS,
     lastResult: game.lastQuestionResult
       ? {
-        winner: game.lastQuestionResult.winnerNickname,
-        winnerId: game.lastQuestionResult.winnerId,
-        correctAnswer: game.lastQuestionResult.correctAnswer,
-      }
+          winner: game.lastQuestionResult.winnerNickname,
+          winnerId: game.lastQuestionResult.winnerId,
+          correctAnswer: game.lastQuestionResult.correctAnswer,
+        }
       : null,
   };
 }
@@ -457,7 +546,7 @@ function buildHypePayload(game, gameId) {
 function computeWinner(players) {
   const sorted = [...players].sort((a, b) => b.score - a.score);
   const topScore = sorted[0]?.score ?? 0;
-  const topPlayers = sorted.filter(p => p.score === topScore);
+  const topPlayers = sorted.filter((p) => p.score === topScore);
   return {
     winnerId: topPlayers.length === 1 ? topPlayers[0].playerId : null,
     winnerNickname: topPlayers.length === 1 ? topPlayers[0].nickname : null,
@@ -466,7 +555,10 @@ function computeWinner(players) {
 
 function buildGameEnd(game) {
   const { winnerId, winnerNickname } = game.lastRoundResults
-    ? { winnerId: game.lastRoundResults.winnerId, winnerNickname: game.lastRoundResults.winnerNickname }
+    ? {
+        winnerId: game.lastRoundResults.winnerId,
+        winnerNickname: game.lastRoundResults.winnerNickname,
+      }
     : computeWinner(game.players);
   return {
     scores: sanitizePlayers(game.players),
@@ -486,4 +578,9 @@ function sanitizePlayers(players) {
   }));
 }
 
-module.exports = { registerGameHandlers, emitQuestion, endQuestion, sanitizePlayers };
+module.exports = {
+  registerGameHandlers,
+  emitQuestion,
+  endQuestion,
+  sanitizePlayers,
+};

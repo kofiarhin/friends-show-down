@@ -5,19 +5,19 @@ const initialState = {
   playerId: null,
   nickname: null,
   isHost: false,
-  genre: null,               // slug string | null — persists across restarts
+  genre: null, // slug string | null — persists across restarts
   status: "idle", // idle | waiting | in-progress | ended
   players: [],
   currentQuestion: null, // { questionNumber, totalQuestions, question, timeLimit }
   lastQuestionResult: null, // { winnerId, winnerNickname, correctAnswer, scores }
-  roundPhase: null,          // "question_live" | "question_result" | "question_hype" | null
+  roundPhase: null, // "question_live" | "question_result" | "question_hype" | null
   phaseStartedAt: null,
   phaseEndsAt: null,
   hasAnswered: false,
-  playState: "running",      // "running" | "paused"
-  endReason: null,           // "completed" | "host_ended" | null
-  lastRoundResults: null,    // snapshot object or null
-  startError: null,          // error message from start:error event | null
+  playState: "running", // "running" | "paused"
+  endReason: null, // "completed" | "host_ended" | null
+  lastRoundResults: null, // snapshot object or null
+  startError: null, // error message from start:error event | null
 };
 
 const gameSlice = createSlice({
@@ -49,7 +49,7 @@ const gameSlice = createSlice({
     },
     addPlayer(state, action) {
       const exists = state.players.find(
-        (p) => p.playerId === action.payload.playerId
+        (p) => p.playerId === action.payload.playerId,
       );
       if (!exists) state.players.push(action.payload);
     },
@@ -67,16 +67,24 @@ const gameSlice = createSlice({
       state.startError = null;
     },
     setQuestionResult(state, action) {
-      state.lastQuestionResult = action.payload;
-      state.roundPhase = action.payload?.roundPhase ?? "question_result";
-      state.phaseStartedAt = action.payload?.phaseStartedAt ?? null;
+      const result = action.payload ? { ...action.payload } : null;
+      if (result && !result.scores && state.lastQuestionResult?.scores) {
+        result.scores = state.lastQuestionResult.scores;
+      }
+      state.lastQuestionResult = result;
+      state.roundPhase = result?.roundPhase ?? "question_result";
+      state.phaseStartedAt = result?.phaseStartedAt ?? null;
       state.phaseEndsAt = null;
-      if (action.payload?.scores) {
-        state.players = action.payload.scores;
+      if (result?.scores) {
+        state.players = result.scores;
       }
     },
     setRoundPhase(state, action) {
-      const { roundPhase, phaseStartedAt = null, phaseEndsAt = null } = action.payload;
+      const {
+        roundPhase,
+        phaseStartedAt = null,
+        phaseEndsAt = null,
+      } = action.payload;
       state.roundPhase = roundPhase;
       state.phaseStartedAt = phaseStartedAt;
       state.phaseEndsAt = phaseEndsAt;
@@ -96,7 +104,10 @@ const gameSlice = createSlice({
     resumeQuestion(state, action) {
       // action.payload = timeLeft in seconds
       if (state.currentQuestion) {
-        state.currentQuestion = { ...state.currentQuestion, timeLimit: action.payload };
+        state.currentQuestion = {
+          ...state.currentQuestion,
+          timeLimit: action.payload,
+        };
       }
       state.playState = "running";
       state.roundPhase = "question_live";
