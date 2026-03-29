@@ -3,16 +3,18 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
-import { setHasAnswered } from "../store/gameSlice";
+import { setHasAnswered, clearChatError } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
 import QuestionResultOverlay from "../components/QuestionResultOverlay";
 import HostControls from "../components/HostControls";
+import ChatPanel from "../components/ChatPanel";
 
 export default function GameScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
+    status,
     currentQuestion,
     lastQuestionResult,
     hasAnswered,
@@ -22,6 +24,8 @@ export default function GameScreen() {
     playState,
     roundPhase,
     phaseEndsAt,
+    chatMessages,
+    chatError,
   } = useSelector((s) => s.game);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [pauseOverlayVisible, setPauseOverlayVisible] = useState(
@@ -81,6 +85,11 @@ export default function GameScreen() {
     });
   }
 
+  const chatEnabled =
+    status === "waiting" ||
+    status === "ended" ||
+    (status === "in-progress" && roundPhase !== "question_live");
+
   if (!currentQuestion) {
     return (
       <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
@@ -89,7 +98,8 @@ export default function GameScreen() {
     );
   }
 
-  const { questionNumber, totalQuestions, question, timeLimit } = currentQuestion;
+  const { questionNumber, totalQuestions, question, timeLimit } =
+    currentQuestion;
   const timerKey = `${questionNumber}-${timeLimit}`;
   const questionKey = `${questionNumber}`;
   const answersDisabled =
@@ -108,7 +118,9 @@ export default function GameScreen() {
           {isHost ? (
             <HostControls gameId={gameId} />
           ) : (
-            <p className="text-gray-400 text-sm">Waiting for the host to resume…</p>
+            <p className="text-gray-400 text-sm">
+              Waiting for the host to resume…
+            </p>
           )}
         </div>
       )}
@@ -142,7 +154,9 @@ export default function GameScreen() {
           <CountdownTimer key={timerKey} timeLimit={timeLimit} />
 
           <div className="question-card bg-gray-800 rounded-2xl px-6 py-8 text-center">
-            <p className="text-xl font-semibold leading-snug">{question.prompt}</p>
+            <p className="text-xl font-semibold leading-snug">
+              {question.prompt}
+            </p>
           </div>
 
           <div className="answer-grid grid grid-cols-2 gap-3">
@@ -176,6 +190,21 @@ export default function GameScreen() {
             Answer submitted. Waiting for result…
           </p>
         )}
+
+        <ChatPanel
+          enabled={chatEnabled}
+          messages={chatMessages}
+          error={chatError}
+          onSend={(message) => {
+            dispatch(clearChatError());
+            socket.emit("chat:send", { gameId, message });
+          }}
+          placeholder={
+            status === "in-progress"
+              ? "Chat opens between questions..."
+              : "Say hello to the lobby!"
+          }
+        />
       </div>
     </div>
   );

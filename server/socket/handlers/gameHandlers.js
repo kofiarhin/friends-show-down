@@ -8,6 +8,7 @@ const {
   setExpiryTimer,
   clearExpiryTimer,
 } = require("../../store/gameStore");
+const { emitChatHistory } = require("./chatHandlers");
 const { shuffleArray } = require("../../utils/shuffleArray");
 const {
   getQuestionsByGenre,
@@ -35,7 +36,8 @@ function registerGameHandlers(io, socket) {
       return socket.emit("join:error", { message: "Game not found." });
     }
 
-    const hasValidHostToken = Boolean(hostToken) && hostToken === game.hostToken;
+    const hasValidHostToken =
+      Boolean(hostToken) && hostToken === game.hostToken;
 
     if (game.status === "in-progress") {
       const existing = getPlayerByNickname(gameId, nickname);
@@ -55,6 +57,7 @@ function registerGameHandlers(io, socket) {
         }
 
         socket.join(gameId);
+        emitChatHistory(socket, game);
         io.to(gameId).emit("players:updated", {
           players: sanitizePlayers(game.players),
         });
@@ -105,6 +108,7 @@ function registerGameHandlers(io, socket) {
           game.hostId = socket.id;
         }
         socket.join(gameId);
+        emitChatHistory(socket, game);
         socket.emit("game:end", buildGameEnd(game));
         io.to(gameId).emit("players:updated", {
           players: sanitizePlayers(game.players),
@@ -152,6 +156,7 @@ function registerGameHandlers(io, socket) {
       if (wasHost) game.hostId = socket.id;
 
       socket.join(gameId);
+      emitChatHistory(socket, game);
       clearExpiryTimer(gameId);
       setExpiryTimer(gameId, WAITING_EXPIRY_MS);
       io.to(gameId).emit("lobby:updated", {
@@ -181,6 +186,7 @@ function registerGameHandlers(io, socket) {
 
     addPlayer(gameId, player);
     socket.join(gameId);
+    emitChatHistory(socket, game);
 
     if (!game.hostId && hasValidHostToken) {
       game.hostId = socket.id;

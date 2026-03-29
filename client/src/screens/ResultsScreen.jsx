@@ -1,18 +1,26 @@
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { socket } from "../socket";
 import { resetGame } from "../store/gameSlice";
 import { useSocketEvents } from "../hooks/useSocketEvents";
 import FinalLeaderboard from "../components/FinalLeaderboard";
 import HostPostGameControls from "../components/HostPostGameControls";
+import ChatPanel from "../components/ChatPanel";
 
 export default function ResultsScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { lastRoundResults, players, isHost, endReason, genre } = useSelector(
-    (s) => s.game,
-  );
+  const {
+    lastRoundResults,
+    players,
+    isHost,
+    endReason,
+    genre,
+    chatMessages,
+    chatError,
+  } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
 
@@ -94,6 +102,16 @@ export default function ResultsScreen() {
 
       <div className="w-full max-w-sm">
         <FinalLeaderboard players={resultScores} />
+      </div>
+
+      <div className="w-full max-w-sm">
+        <ChatPanel
+          enabled={true}
+          messages={chatMessages}
+          error={chatError}
+          onSend={(message) => socket.emit("chat:send", { gameId, message })}
+          placeholder="Share your final thoughts..."
+        />
       </div>
 
       {/* Current room roster (updates in real-time as players join) */}

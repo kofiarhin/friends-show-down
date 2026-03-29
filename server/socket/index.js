@@ -1,5 +1,9 @@
-const { registerGameHandlers, sanitizePlayers } = require("./handlers/gameHandlers");
+const {
+  registerGameHandlers,
+  sanitizePlayers,
+} = require("./handlers/gameHandlers");
 const { registerQuestionHandlers } = require("./handlers/questionHandlers");
+const { registerChatHandlers } = require("./handlers/chatHandlers");
 const {
   getGame,
   markDisconnected,
@@ -13,6 +17,7 @@ function initSocket(io) {
   io.on("connection", (socket) => {
     registerGameHandlers(io, socket);
     registerQuestionHandlers(io, socket);
+    registerChatHandlers(io, socket);
 
     socket.on("disconnect", () => {
       // Find the game this socket belongs to by scanning rooms

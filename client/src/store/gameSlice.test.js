@@ -32,6 +32,8 @@ const initial = {
   endReason: null,
   lastRoundResults: null,
   startError: null,
+  chatMessages: [],
+  chatError: null,
 };
 
 describe("gameSlice", () => {

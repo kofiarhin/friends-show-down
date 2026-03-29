@@ -13,6 +13,9 @@ import {
   setPlayState,
   setEndReason,
   setLastRoundResults,
+  addChatMessage,
+  setChatMessages,
+  setChatError,
   resumeQuestion,
   resetRound,
   resetGame,
@@ -54,7 +57,7 @@ export function useSocketEvents(gameId) {
           roundPhase: payload.roundPhase,
           phaseStartedAt: payload.phaseStartedAt,
           phaseEndsAt: payload.phaseEndsAt,
-        })
+        }),
       );
       if (payload.lastResult) {
         dispatch(
@@ -64,9 +67,23 @@ export function useSocketEvents(gameId) {
             correctAnswer: payload.lastResult.correctAnswer,
             roundPhase: "question_hype",
             phaseStartedAt: payload.phaseStartedAt,
-          })
+          }),
         );
       }
+    }
+
+    function onChatMessage(payload) {
+      dispatch(addChatMessage(payload));
+    }
+
+    function onChatHistory(payload) {
+      if (payload?.messages) {
+        dispatch(setChatMessages(payload.messages));
+      }
+    }
+
+    function onChatError(payload) {
+      dispatch(setChatError(payload?.message ?? "Unable to send message."));
     }
 
     function onGameEnd(payload) {
@@ -112,6 +129,9 @@ export function useSocketEvents(gameId) {
     socket.on("question:start", onQuestionStart);
     socket.on("question:end", onQuestionEnd);
     socket.on("round:phase", onRoundPhase);
+    socket.on("chat:message", onChatMessage);
+    socket.on("chat:history", onChatHistory);
+    socket.on("chat:error", onChatError);
     socket.on("game:end", onGameEnd);
     socket.on("game:closed", onGameClosed);
     socket.on("game:paused", onGamePaused);
@@ -131,6 +151,9 @@ export function useSocketEvents(gameId) {
       socket.off("question:start", onQuestionStart);
       socket.off("question:end", onQuestionEnd);
       socket.off("round:phase", onRoundPhase);
+      socket.off("chat:message", onChatMessage);
+      socket.off("chat:history", onChatHistory);
+      socket.off("chat:error", onChatError);
       socket.off("game:end", onGameEnd);
       socket.off("game:closed", onGameClosed);
       socket.off("game:paused", onGamePaused);

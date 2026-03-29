@@ -1,15 +1,26 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
+import { clearChatError } from "../store/gameSlice";
 import PlayerList from "../components/PlayerList";
 import ShareLink from "../components/ShareLink";
+import ChatPanel from "../components/ChatPanel";
 
 export default function LobbyScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
-  const { players, isHost, nickname, genre, startError } = useSelector((s) => s.game);
+  const dispatch = useDispatch();
+  const {
+    players,
+    isHost,
+    nickname,
+    genre,
+    startError,
+    chatMessages,
+    chatError,
+  } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
 
@@ -55,6 +66,16 @@ export default function LobbyScreen() {
           <p className="text-sm text-gray-400 mb-2">Share link</p>
           <ShareLink gameId={gameId} />
         </div>
+
+        <ChatPanel
+          enabled={true}
+          messages={chatMessages}
+          error={chatError}
+          onSend={(message) => {
+            dispatch(clearChatError());
+            socket.emit("chat:send", { gameId, message });
+          }}
+        />
 
         {isHost && (
           <div className="flex flex-col gap-2">

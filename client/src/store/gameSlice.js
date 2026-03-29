@@ -19,6 +19,8 @@ const initialState = {
   endReason: null, // "completed" | "host_ended" | null
   lastRoundResults: null, // snapshot object or null
   startError: null, // error message from start:error event | null
+  chatMessages: [],
+  chatError: null,
 };
 
 const gameSlice = createSlice({
@@ -104,6 +106,24 @@ const gameSlice = createSlice({
     setLastRoundResults(state, action) {
       state.lastRoundResults = action.payload;
     },
+    addChatMessage(state, action) {
+      state.chatMessages.push(action.payload);
+      if (state.chatMessages.length > 50) {
+        state.chatMessages.shift();
+      }
+    },
+    setChatMessages(state, action) {
+      state.chatMessages = action.payload || [];
+    },
+    setChatError(state, action) {
+      state.chatError = action.payload;
+    },
+    clearChatMessages(state) {
+      state.chatMessages = [];
+    },
+    clearChatError(state) {
+      state.chatError = null;
+    },
     resumeQuestion(state, action) {
       // action.payload = timeLeft in seconds
       if (state.currentQuestion) {
@@ -147,6 +167,11 @@ export const {
   setPlayState,
   setEndReason,
   setLastRoundResults,
+  addChatMessage,
+  setChatMessages,
+  setChatError,
+  clearChatMessages,
+  clearChatError,
   resumeQuestion,
   resetRound,
   resetGame,

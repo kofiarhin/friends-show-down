@@ -29,6 +29,7 @@ function createGame(gameId, hostId, genre, hostToken = null) {
     remainingTimeMs: null,
     endReason: null,
     lastRoundResults: null,
+    chatMessages: [],
     expiryTimer: null,
   };
   games.set(gameId, game);
@@ -63,7 +64,7 @@ function getPlayerByNickname(gameId, nickname) {
   if (!game) return null;
   return (
     game.players.find(
-      (p) => p.nickname.toLowerCase() === nickname.toLowerCase()
+      (p) => p.nickname.toLowerCase() === nickname.toLowerCase(),
     ) || null
   );
 }
@@ -74,6 +75,23 @@ function updateScore(gameId, playerId, delta = 1) {
   const player = game.players.find((p) => p.playerId === playerId);
   if (player) player.score += delta;
   return game;
+}
+
+function addChatMessage(gameId, message) {
+  const game = getGame(gameId);
+  if (!game) return null;
+  if (!Array.isArray(game.chatMessages)) game.chatMessages = [];
+  game.chatMessages.push(message);
+  if (game.chatMessages.length > 50) {
+    game.chatMessages.shift();
+  }
+  return game.chatMessages;
+}
+
+function getChatMessages(gameId) {
+  const game = getGame(gameId);
+  if (!game) return [];
+  return Array.isArray(game.chatMessages) ? game.chatMessages : [];
 }
 
 function markDisconnected(gameId, playerId) {
@@ -119,6 +137,8 @@ module.exports = {
   getPlayer,
   getPlayerByNickname,
   updateScore,
+  addChatMessage,
+  getChatMessages,
   markDisconnected,
   markConnected,
   setExpiryTimer,
