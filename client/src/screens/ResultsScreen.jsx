@@ -65,7 +65,7 @@ export default function ResultsScreen() {
       )}
 
       {isHost ? (
-        <HostPostGameControls gameId={gameId} />
+        <HostPostGameControls gameId={gameId} genre={genre} />
       ) : (
         <div className="flex flex-col items-center gap-4 w-full max-w-sm">
           <p className="text-center text-gray-500 text-sm">

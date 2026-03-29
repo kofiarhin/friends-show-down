@@ -9,7 +9,7 @@ const {
   clearExpiryTimer,
 } = require("../../store/gameStore");
 const { shuffleArray } = require("../../utils/shuffleArray");
-const { getQuestionsByGenre, MIN_QUESTIONS_PER_GENRE } = require("../../utils/questionBank");
+const { getQuestionsByGenre, MIN_QUESTIONS_PER_GENRE, isValidGenre } = require("../../utils/questionBank");
 
 const WAITING_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 const ENDED_EXPIRY_MS = 15 * 60 * 1000;   // 15 min
@@ -236,6 +236,18 @@ function registerGameHandlers(io, socket) {
 
     io.to(gameId).emit("game:closed", { reason: "host_ended" });
     deleteGame(gameId);
+  });
+
+  // room:set-genre — host changes genre while room is in ended state
+  socket.on("room:set-genre", ({ gameId, genre }) => {
+    const game = getGame(gameId);
+    if (!game) return socket.emit("action:error", { message: "Game not found." });
+    if (socket.id !== game.hostId) return socket.emit("action:error", { message: "Only the host can do that." });
+    if (game.status !== "ended") return socket.emit("action:error", { message: "Genre can only be changed after a round ends." });
+    if (!isValidGenre(genre)) return socket.emit("action:error", { message: "Invalid genre." });
+
+    game.config.genre = genre;
+    io.to(gameId).emit("genre:updated", { genre });
   });
 
   // game:pause — host pauses an active question

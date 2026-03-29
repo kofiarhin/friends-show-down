@@ -80,6 +80,10 @@ export function useSocketEvents(gameId) {
       dispatch(setStartError(message));
     }
 
+    function onGenreUpdated({ genre }) {
+      dispatch(setGenre(genre));
+    }
+
     socket.on("connect", onConnect);
     socket.on("lobby:updated", onLobbyUpdated);
     socket.on("players:updated", onPlayersUpdated);
@@ -91,6 +95,7 @@ export function useSocketEvents(gameId) {
     socket.on("game:resumed", onGameResumed);
     socket.on("game:restarted", onGameRestarted);
     socket.on("start:error", onStartError);
+    socket.on("genre:updated", onGenreUpdated);
 
     if (socket.connected) {
       dispatch(setPlayerId(socket.id));
@@ -108,6 +113,7 @@ export function useSocketEvents(gameId) {
       socket.off("game:resumed", onGameResumed);
       socket.off("game:restarted", onGameRestarted);
       socket.off("start:error", onStartError);
+      socket.off("genre:updated", onGenreUpdated);
     };
   }, [dispatch, navigate, gameId]);
 }
