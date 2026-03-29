@@ -1,0 +1,22 @@
+# .codex/config.toml
+
+# No approval prompts
+approval_policy = "never"
+
+# Codex can read, edit, and run commands inside the working directory
+sandbox_mode = "workspace-write"
+
+# Subagent settings
+[agents]
+max_threads = 6
+max_depth = 1
+# Optional: default timeout per worker for spawn_agents_on_csv jobs
+job_max_runtime_seconds = 1800
+
+# Keep command network access off by default
+[sandbox_workspace_write]
+network_access = false
+
+# Recommended when running Codex natively on Windows
+[windows]
+sandbox = "elevated"
