@@ -4,6 +4,7 @@ import NameEntryScreen from "./screens/NameEntryScreen";
 import LobbyScreen from "./screens/LobbyScreen";
 import GameScreen from "./screens/GameScreen";
 import ResultsScreen from "./screens/ResultsScreen";
+import LeaderboardScreen from "./screens/LeaderboardScreen";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/game/:gameId/lobby" element={<LobbyScreen />} />
         <Route path="/game/:gameId/play" element={<GameScreen />} />
         <Route path="/game/:gameId/results" element={<ResultsScreen />} />
+        <Route path="/leaderboard" element={<LeaderboardScreen />} />
       </Routes>
     </BrowserRouter>
   );

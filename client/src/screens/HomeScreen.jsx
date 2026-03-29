@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setGame, resetGame } from "../store/gameSlice";
@@ -121,6 +121,14 @@ export default function HomeScreen() {
                 Play
               </span>
             </div>
+            <div className="mt-6 flex justify-center">
+              <Link
+                to="/leaderboard"
+                className="rounded-2xl bg-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+              >
+                View weekly leaderboard
+              </Link>
+            </div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-5">
@@ -136,7 +144,9 @@ export default function HomeScreen() {
               </p>
 
               <div className="mt-5 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-slate-200">Choose a category</p>
+                <p className="text-sm font-medium text-slate-200">
+                  Choose a category
+                </p>
                 <span className="rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200">
                   {selectedGenreLabel}
                 </span>
@@ -165,7 +175,9 @@ export default function HomeScreen() {
               </div>
 
               {mutation.isError && (
-                <p className="mt-4 text-sm text-red-400">{mutation.error.message}</p>
+                <p className="mt-4 text-sm text-red-400">
+                  {mutation.error.message}
+                </p>
               )}
 
               <button

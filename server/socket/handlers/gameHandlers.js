@@ -8,6 +8,7 @@ const {
   setExpiryTimer,
   clearExpiryTimer,
 } = require("../../store/gameStore");
+const { recordCompletedGame } = require("../../store/leaderboardStore");
 const { emitChatHistory } = require("./chatHandlers");
 const { shuffleArray } = require("../../utils/shuffleArray");
 const {
@@ -625,6 +626,7 @@ function endQuestion(io, gameId, winnerId, winnerNickname) {
         winnerNickname: finalWinnerNickname,
         endReason: "completed",
       };
+      recordCompletedGame(g);
       io.to(gameId).emit("game:end", buildGameEnd(g));
       setExpiryTimer(gameId, ENDED_EXPIRY_MS, () => {
         io.to(gameId).emit("game:closed", { reason: "expired" });
