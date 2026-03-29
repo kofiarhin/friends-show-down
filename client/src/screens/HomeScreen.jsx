@@ -21,10 +21,12 @@ async function createGame(genre) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ genre }),
   });
+
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.message || "Failed to create game.");
   }
+
   return res.json();
 }
 
@@ -33,8 +35,7 @@ export default function HomeScreen() {
   const dispatch = useDispatch();
   const [joinInput, setJoinInput] = useState("");
   const [joinError, setJoinError] = useState("");
-  const [showGenreSelector, setShowGenreSelector] = useState(false);
-  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [selectedGenre, setSelectedGenre] = useState("mixed");
 
   const mutation = useMutation({
     mutationFn: createGame,
@@ -52,13 +53,12 @@ export default function HomeScreen() {
     },
   });
 
-  function handleCreateClick() {
-    setShowGenreSelector(true);
+  function handleSelectGenre(genre) {
+    setSelectedGenre(genre);
     mutation.reset();
   }
 
-  function handleConfirm() {
-    if (!selectedGenre) return;
+  function handleCreateGame() {
     mutation.mutate(selectedGenre);
   }
 
@@ -66,104 +66,166 @@ export default function HomeScreen() {
     e.preventDefault();
     setJoinError("");
     const raw = joinInput.trim();
+
     if (!raw) {
       setJoinError("Enter a game ID or link.");
       return;
     }
+
     const match =
       raw.match(/\/game\/([^/]+)\//) || raw.match(/^([A-Za-z0-9_-]+)$/);
+
     if (!match) {
       setJoinError("Invalid game ID or link.");
       return;
     }
+
     const gameId = match[1];
     dispatch(resetGame());
     dispatch(setGame({ gameId, isHost: false }));
     navigate(`/game/${gameId}/join`);
   }
 
+  const selectedGenreLabel =
+    GENRES.find((genre) => genre.slug === selectedGenre)?.label ?? "Mixed";
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-10 px-4">
-      <div className="text-center">
-        <h1 className="text-5xl font-extrabold tracking-tight text-indigo-400">
-          Friends Showdown
-        </h1>
-        <p className="mt-3 text-gray-400 text-lg">
-          Speed-based real-time multiplayer trivia
-        </p>
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-20 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-600/20 blur-3xl" />
+        <div className="absolute bottom-10 left-10 h-56 w-56 rounded-full bg-fuchsia-500/10 blur-3xl" />
+        <div className="absolute right-10 top-1/3 h-48 w-48 rounded-full bg-sky-500/10 blur-3xl" />
       </div>
 
-      <div className="flex flex-col gap-6 w-full max-w-sm">
-        {!showGenreSelector ? (
-          <button
-            onClick={handleCreateClick}
-            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-lg transition"
-          >
-            Create Game
-          </button>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-400 text-center">
-              Choose a category
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10">
+        <div className="w-full max-w-4xl rounded-[32px] border border-white/10 bg-slate-900/70 p-6 shadow-2xl backdrop-blur md:p-8">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300/80">
+              Real-time trivia
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {GENRES.map(({ slug, label }) => (
-                <button
-                  key={slug}
-                  onClick={() => setSelectedGenre(slug)}
-                  className={`py-2.5 rounded-xl font-semibold text-sm transition border ${
-                    selectedGenre === slug
-                      ? "bg-indigo-600 border-indigo-500 text-white"
-                      : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-indigo-400 sm:text-5xl">
+              Friends Showdown
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
+              Create a room, share the code, and race to answer first.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm">
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-200">
+                Create
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-200">
+                Share
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-200">
+                Play
+              </span>
             </div>
-
-            {mutation.isError && (
-              <p className="text-red-400 text-sm text-center">
-                {mutation.error.message}
-              </p>
-            )}
-
-            <button
-              onClick={handleConfirm}
-              disabled={!selectedGenre || mutation.isPending}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-lg disabled:opacity-40 disabled:cursor-not-allowed transition"
-            >
-              {mutation.isPending ? "Creating…" : "Confirm"}
-            </button>
-            <button
-              onClick={() => {
-                setShowGenreSelector(false);
-                setSelectedGenre(null);
-                mutation.reset();
-              }}
-              className="w-full py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm text-gray-400 hover:text-white transition"
-            >
-              Cancel
-            </button>
           </div>
-        )}
 
-        <form onSubmit={handleJoin} className="flex flex-col gap-3">
-          <input
-            type="text"
-            value={joinInput}
-            onChange={(e) => setJoinInput(e.target.value)}
-            placeholder="Game ID or share link"
-            className="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-          />
-          {joinError && <p className="text-red-400 text-sm">{joinError}</p>}
-          <button
-            type="submit"
-            className="w-full py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-semibold text-lg transition"
-          >
-            Join Game
-          </button>
-        </form>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-5">
+            <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-300/80">
+                Host a game
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">
+                Start a room in seconds
+              </h2>
+              <p className="mt-2 text-sm text-slate-300">
+                Pick a category and start a room for your friends right away.
+              </p>
+
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-slate-200">Choose a category</p>
+                <span className="rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200">
+                  {selectedGenreLabel}
+                </span>
+              </div>
+
+              <div
+                className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"
+                role="group"
+                aria-label="Choose a category"
+              >
+                {GENRES.map(({ slug, label }) => (
+                  <button
+                    key={slug}
+                    type="button"
+                    aria-pressed={selectedGenre === slug}
+                    onClick={() => handleSelectGenre(slug)}
+                    className={`rounded-2xl border px-3 py-2.5 text-sm font-semibold transition ${
+                      selectedGenre === slug
+                        ? "border-indigo-400 bg-indigo-600 text-white shadow-lg shadow-indigo-950/40"
+                        : "border-white/10 bg-slate-800 text-slate-200 hover:border-slate-500 hover:bg-slate-700"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {mutation.isError && (
+                <p className="mt-4 text-sm text-red-400">{mutation.error.message}</p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCreateGame}
+                disabled={mutation.isPending}
+                className="mt-5 w-full rounded-2xl bg-indigo-600 px-4 py-3 text-lg font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {mutation.isPending ? "Creating..." : "Create Game"}
+              </button>
+            </section>
+
+            <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-300/80">
+                Join a game
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">
+                Jump into the next round
+              </h2>
+              <p className="mt-2 text-sm text-slate-300">
+                Paste an invite link or enter a room code to join your friends.
+              </p>
+
+              <form onSubmit={handleJoin} className="mt-6 flex flex-col gap-3">
+                <label
+                  htmlFor="join-game-input"
+                  className="text-sm font-medium text-slate-200"
+                >
+                  Game ID or share link
+                </label>
+                <input
+                  id="join-game-input"
+                  type="text"
+                  value={joinInput}
+                  onChange={(e) => {
+                    setJoinInput(e.target.value);
+                    if (joinError) setJoinError("");
+                  }}
+                  placeholder="ABC123 or https://..."
+                  aria-describedby="join-game-help"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-800 px-4 py-3 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+                />
+                <p id="join-game-help" className="text-sm text-slate-400">
+                  Example: ABC123 or a full invite link
+                </p>
+                {joinError && (
+                  <p className="text-sm text-red-400" role="alert">
+                    {joinError}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="mt-1 w-full rounded-2xl bg-slate-700 px-4 py-3 text-lg font-semibold text-white transition hover:bg-slate-600"
+                >
+                  Join Game
+                </button>
+              </form>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
   );
