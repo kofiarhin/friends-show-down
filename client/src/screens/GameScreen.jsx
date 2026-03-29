@@ -14,6 +14,7 @@ export default function GameScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
+    playerId,
     status,
     currentQuestion,
     lastQuestionResult,
@@ -134,10 +135,11 @@ export default function GameScreen() {
         />
       )}
 
-      <div
-        className="gameplay-content w-full max-w-md flex flex-col gap-6"
-        data-paused={isPauseOverlayActive}
-      >
+      <div className="w-full max-w-6xl grid gap-6 md:grid-cols-[1.8fr_1fr]">
+        <div
+          className="gameplay-content w-full flex flex-col gap-6"
+          data-paused={isPauseOverlayActive}
+        >
         {isHost && playState === "running" && (
           <div className="flex justify-end">
             <HostControls gameId={gameId} />
@@ -190,9 +192,14 @@ export default function GameScreen() {
             Answer submitted. Waiting for result…
           </p>
         )}
+        </div>
+      </div>
 
+      <div className="flex flex-col gap-6">
         <ChatPanel
           enabled={chatEnabled}
+          title="Game chat"
+          currentUserId={playerId}
           messages={chatMessages}
           error={chatError}
           onSend={(message) => {

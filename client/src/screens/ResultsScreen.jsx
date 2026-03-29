@@ -13,6 +13,7 @@ export default function ResultsScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
+    playerId,
     lastRoundResults,
     players,
     isHost,
@@ -76,42 +77,70 @@ export default function ResultsScreen() {
         </div>
       )}
 
-      <div className="w-full max-w-sm">
-        <div className="mb-6 rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
-            Final summary
-          </p>
-          <div className="mt-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm text-gray-400">Top scorer</p>
-              <p className="text-2xl font-semibold text-white">
-                {topScorer?.nickname ?? "No scorer"}
-              </p>
-            </div>
-            <div className="rounded-full bg-indigo-600 px-3 py-1 text-sm font-semibold">
-              {topScore} pts
-            </div>
-          </div>
-          {isTie && topPlayers.length > 1 && (
-            <p className="mt-3 text-sm text-yellow-300">
-              Shared victory for {topPlayers.length} players.
+      <div className="w-full max-w-6xl grid gap-6 md:grid-cols-[1.8fr_1fr]">
+        <div className="flex flex-col gap-6">
+          <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
+              Final summary
             </p>
+            <div className="mt-4 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm text-gray-400">Top scorer</p>
+                <p className="text-2xl font-semibold text-white">
+                  {topScorer?.nickname ?? "No scorer"}
+                </p>
+              </div>
+              <div className="rounded-full bg-indigo-600 px-3 py-1 text-sm font-semibold">
+                {topScore} pts
+              </div>
+            </div>
+            {isTie && topPlayers.length > 1 && (
+              <p className="mt-3 text-sm text-yellow-300">
+                Shared victory for {topPlayers.length} players.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
+            <FinalLeaderboard players={resultScores} />
+          </div>
+
+          {players.length !== resultScores.length && (
+            <div className="text-sm text-gray-500 text-center">
+              {players.length - resultScores.length > 0
+                ? `+${players.length - resultScores.length} player(s) joined after the round`
+                : null}
+            </div>
+          )}
+
+          {isHost ? (
+            <HostPostGameControls gameId={gameId} genre={genre} />
+          ) : (
+            <div className="flex flex-col items-center gap-4 w-full">
+              <p className="text-center text-gray-500 text-sm">
+                Waiting for host to start next round…
+              </p>
+              <button
+                onClick={handlePlayAgain}
+                className="w-full py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-semibold text-lg transition"
+              >
+                Leave Game
+              </button>
+            </div>
           )}
         </div>
-      </div>
 
-      <div className="w-full max-w-sm">
-        <FinalLeaderboard players={resultScores} />
-      </div>
-
-      <div className="w-full max-w-sm">
-        <ChatPanel
-          enabled={true}
-          messages={chatMessages}
-          error={chatError}
-          onSend={(message) => socket.emit("chat:send", { gameId, message })}
-          placeholder="Share your final thoughts..."
-        />
+        <div className="flex flex-col gap-6">
+          <ChatPanel
+            enabled={true}
+            title="Post-game chat"
+            currentUserId={playerId}
+            messages={chatMessages}
+            error={chatError}
+            onSend={(message) => socket.emit("chat:send", { gameId, message })}
+            placeholder="Share your final thoughts..."
+          />
+        </div>
       </div>
 
       {/* Current room roster (updates in real-time as players join) */}

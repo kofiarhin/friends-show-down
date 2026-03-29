@@ -13,6 +13,7 @@ export default function LobbyScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
+    playerId,
     players,
     isHost,
     nickname,
@@ -54,28 +55,63 @@ export default function LobbyScreen() {
         )}
       </div>
 
-      <div className="w-full max-w-sm flex flex-col gap-6">
-        <div>
-          <p className="text-sm text-gray-400 mb-2">
-            Players ({connectedCount})
-          </p>
-          <PlayerList players={players} />
+      <div className="w-full max-w-7xl grid gap-6 md:grid-cols-[1.8fr_1fr]">
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="text-sm text-gray-400 mb-2">
+              Players ({connectedCount})
+            </p>
+            <PlayerList players={players} />
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-400 mb-2">Share link</p>
+            <ShareLink gameId={gameId} />
+          </div>
+
+          {isHost && (
+            <div className="flex flex-col gap-2">
+              {startError && (
+                <p className="text-red-400 text-sm text-center">{startError}</p>
+              )}
+              <button
+                onClick={handleStart}
+                disabled={connectedCount < 2}
+                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-lg disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                {connectedCount < 2
+                  ? `Waiting for players… (${connectedCount}/2)`
+                  : "Start Game"}
+              </button>
+              <button
+                onClick={handleCancel}
+                className="w-full py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm text-gray-400 hover:text-white transition"
+              >
+                Cancel Game
+              </button>
+            </div>
+          )}
+
+          {!isHost && (
+            <p className="text-center text-gray-500 text-sm">
+              Waiting for the host to start the game…
+            </p>
+          )}
         </div>
 
-        <div>
-          <p className="text-sm text-gray-400 mb-2">Share link</p>
-          <ShareLink gameId={gameId} />
+        <div className="flex flex-col gap-6">
+          <ChatPanel
+            enabled={true}
+            title="Lobby chat"
+            currentUserId={playerId}
+            messages={chatMessages}
+            error={chatError}
+            onSend={(message) => {
+              dispatch(clearChatError());
+              socket.emit("chat:send", { gameId, message });
+            }}
+          />
         </div>
-
-        <ChatPanel
-          enabled={true}
-          messages={chatMessages}
-          error={chatError}
-          onSend={(message) => {
-            dispatch(clearChatError());
-            socket.emit("chat:send", { gameId, message });
-          }}
-        />
 
         {isHost && (
           <div className="flex flex-col gap-2">

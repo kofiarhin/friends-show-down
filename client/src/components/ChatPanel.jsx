@@ -6,6 +6,8 @@ export default function ChatPanel({
   onSend,
   error,
   placeholder = "Type a message...",
+  currentUserId,
+  title = "Chat",
 }) {
   const [draft, setDraft] = useState("");
   const [localError, setLocalError] = useState(null);
@@ -42,11 +44,16 @@ export default function ChatPanel({
   }
 
   return (
-    <div className="chat-panel rounded-3xl border border-white/10 bg-slate-900/90 p-4 shadow-lg">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-400">
-          Chat
-        </h2>
+    <div className="chat-panel flex h-full min-h-[28rem] flex-col rounded-3xl border border-white/10 bg-slate-900/90 shadow-lg">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-400">
+            {title}
+          </p>
+          <p className="text-xs text-gray-500">
+            {messages.length} message{messages.length === 1 ? "" : "s"}
+          </p>
+        </div>
         <span className="text-xs text-gray-500">
           {enabled ? "Open" : "Disabled"}
         </span>
@@ -54,31 +61,60 @@ export default function ChatPanel({
 
       <div
         ref={listRef}
-        className="mb-3 max-h-64 overflow-y-auto rounded-2xl border border-white/5 bg-gray-950 px-3 py-3 space-y-3"
+        className="flex-1 overflow-y-auto px-4 py-4 min-h-0 space-y-3"
       >
         {messages.length === 0 ? (
           <p className="text-xs text-gray-500">No messages yet.</p>
         ) : (
-          messages.map((message) => (
-            <div key={message.messageId} className="space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-white">
-                  {message.nickname}
-                </span>
-                <span className="text-[11px] text-gray-500">
-                  {new Date(message.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+          messages.map((message) => {
+            const isMine = currentUserId && message.playerId === currentUserId;
+            const timestamp = new Date(message.timestamp).toLocaleTimeString(
+              [],
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              },
+            );
+
+            return (
+              <div
+                key={message.messageId}
+                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-sm ${
+                    isMine
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-800 text-gray-200"
+                  }`}
+                >
+                  {!isMine && (
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-white">
+                        {message.nickname}
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        {timestamp}
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-sm leading-6">{message.message}</p>
+                  {isMine && (
+                    <div className="mt-2 text-right text-[10px] text-white/80">
+                      {timestamp}
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-gray-200">{message.message}</p>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-2">
+      <form
+        onSubmit={handleSubmit}
+        className="border-t border-white/10 px-4 py-4 bg-slate-950"
+      >
         <div className="relative">
           <input
             type="text"
@@ -93,7 +129,7 @@ export default function ChatPanel({
             className="w-full rounded-2xl border border-white/10 bg-gray-900 px-4 py-3 text-sm text-white outline-none transition disabled:cursor-not-allowed disabled:bg-gray-800"
           />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-2">
           {(localError || error) && (
             <p className="text-xs text-red-400">{localError || error}</p>
           )}
