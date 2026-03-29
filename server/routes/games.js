@@ -2,16 +2,26 @@ const express = require("express");
 const router = express.Router();
 const { createGame, getGame } = require("../store/gameStore");
 const { generateId } = require("../utils/generateId");
+const { isValidGenre } = require("../utils/questionBank");
 const config = require("../config");
 
 // POST /api/games — create a new game session
 router.post("/", (req, res) => {
+  const { genre } = req.body;
+
+  if (!genre) {
+    return res.status(400).json({ message: "Genre is required." });
+  }
+  if (!isValidGenre(genre)) {
+    return res.status(400).json({ message: "Invalid genre." });
+  }
+
   let gameId;
   do {
     gameId = generateId();
   } while (getGame(gameId));
 
-  createGame(gameId, null); // hostId assigned on socket join
+  createGame(gameId, null, genre); // hostId assigned on socket join
 
   const gameUrl = `${config.clientUrl}/game/${gameId}/join`;
 
@@ -35,6 +45,7 @@ router.get("/:gameId", (req, res) => {
     gameId: game.gameId,
     status: game.status,
     playerCount: game.players.length,
+    genre: game.config.genre,
   });
 });
 

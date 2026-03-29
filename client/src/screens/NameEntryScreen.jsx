@@ -101,6 +101,11 @@ export default function NameEntryScreen() {
         <p className="mt-2 text-gray-400 text-sm font-mono">
           Game ID: <span className="text-white">{gameId}</span>
         </p>
+        {gameData?.genre && (
+          <p className="mt-1 text-indigo-300 text-sm">
+            Category: <span className="font-semibold capitalize">{gameData.genre}</span>
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">

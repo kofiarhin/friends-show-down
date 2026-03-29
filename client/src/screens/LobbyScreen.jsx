@@ -9,7 +9,7 @@ import ShareLink from "../components/ShareLink";
 export default function LobbyScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
-  const { players, isHost, nickname } = useSelector((s) => s.game);
+  const { players, isHost, nickname, genre, startError } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
 
@@ -36,6 +36,11 @@ export default function LobbyScreen() {
       <div className="text-center">
         <h1 className="text-3xl font-bold text-indigo-400">Lobby</h1>
         <p className="mt-1 text-gray-500 text-sm font-mono">Game: {gameId}</p>
+        {genre && (
+          <p className="mt-1 text-indigo-300 text-sm">
+            Category: <span className="font-semibold capitalize">{genre}</span>
+          </p>
+        )}
       </div>
 
       <div className="w-full max-w-sm flex flex-col gap-6">
@@ -53,6 +58,9 @@ export default function LobbyScreen() {
 
         {isHost && (
           <div className="flex flex-col gap-2">
+            {startError && (
+              <p className="text-red-400 text-sm text-center">{startError}</p>
+            )}
             <button
               onClick={handleStart}
               disabled={connectedCount < 2}

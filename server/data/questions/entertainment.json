@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ent-1",
+    "prompt": "Who wrote Romeo and Juliet?",
+    "options": ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+    "correctAnswer": "William Shakespeare"
+  },
+  {
+    "id": "ent-2",
+    "prompt": "Who painted the Mona Lisa?",
+    "options": ["Michelangelo", "Raphael", "Leonardo da Vinci", "Caravaggio"],
+    "correctAnswer": "Leonardo da Vinci"
+  },
+  {
+    "id": "ent-3",
+    "prompt": "Which band released the song 'Bohemian Rhapsody'?",
+    "options": ["The Beatles", "Led Zeppelin", "Queen", "The Rolling Stones"],
+    "correctAnswer": "Queen"
+  },
+  {
+    "id": "ent-4",
+    "prompt": "What is the name of the fictional detective created by Arthur Conan Doyle?",
+    "options": ["Hercule Poirot", "Miss Marple", "Philip Marlowe", "Sherlock Holmes"],
+    "correctAnswer": "Sherlock Holmes"
+  },
+  {
+    "id": "ent-5",
+    "prompt": "In which city is Hollywood located?",
+    "options": ["San Francisco", "New York", "Chicago", "Los Angeles"],
+    "correctAnswer": "Los Angeles"
+  },
+  {
+    "id": "ent-6",
+    "prompt": "How many strings does a standard acoustic guitar have?",
+    "options": ["4", "5", "6", "7"],
+    "correctAnswer": "6"
+  },
+  {
+    "id": "ent-7",
+    "prompt": "Who is known as the 'King of Pop'?",
+    "options": ["Elvis Presley", "Prince", "Michael Jackson", "David Bowie"],
+    "correctAnswer": "Michael Jackson"
+  },
+  {
+    "id": "ent-8",
+    "prompt": "Which streaming platform produces the show 'Stranger Things'?",
+    "options": ["HBO", "Amazon Prime", "Disney+", "Netflix"],
+    "correctAnswer": "Netflix"
+  },
+  {
+    "id": "ent-9",
+    "prompt": "What nationality was composer Ludwig van Beethoven?",
+    "options": ["Austrian", "German", "French", "Czech"],
+    "correctAnswer": "German"
+  },
+  {
+    "id": "ent-10",
+    "prompt": "Which novel features the character Atticus Finch?",
+    "options": ["Of Mice and Men", "The Great Gatsby", "To Kill a Mockingbird", "1984"],
+    "correctAnswer": "To Kill a Mockingbird"
+  },
+  {
+    "id": "ent-11",
+    "prompt": "Which film franchise features the character Jack Sparrow?",
+    "options": ["Mission: Impossible", "Pirates of the Caribbean", "Indiana Jones", "The Mummy"],
+    "correctAnswer": "Pirates of the Caribbean"
+  },
+  {
+    "id": "ent-12",
+    "prompt": "How many Harry Potter books are in the main series?",
+    "options": ["5", "6", "7", "8"],
+    "correctAnswer": "7"
+  }
+]

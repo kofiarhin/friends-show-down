@@ -15,6 +15,8 @@ import {
   resumeQuestion,
   resetRound,
   resetGame,
+  setGenre,
+  setStartError,
 } from "../store/gameSlice";
 
 export function useSocketEvents(gameId) {
@@ -26,8 +28,9 @@ export function useSocketEvents(gameId) {
       dispatch(setPlayerId(socket.id));
     }
 
-    function onLobbyUpdated({ players }) {
+    function onLobbyUpdated({ players, genre }) {
       dispatch(setPlayers(players));
+      if (genre !== undefined) dispatch(setGenre(genre));
     }
 
     function onPlayersUpdated({ players }) {
@@ -49,6 +52,7 @@ export function useSocketEvents(gameId) {
       dispatch(setEndReason(payload.endReason ?? "completed"));
       dispatch(setLastRoundResults(payload));
       dispatch(setQuestionResult(payload));
+      if (payload.genre !== undefined) dispatch(setGenre(payload.genre));
       if (gameId) navigate(`/game/${gameId}/results`);
     }
 
@@ -65,10 +69,15 @@ export function useSocketEvents(gameId) {
       dispatch(resumeQuestion(Math.ceil(remainingTimeMs / 1000)));
     }
 
-    function onGameRestarted({ players }) {
+    function onGameRestarted({ players, genre }) {
       dispatch(resetRound());
+      if (genre !== undefined) dispatch(setGenre(genre));
       dispatch(setPlayers(players));
       if (gameId) navigate(`/game/${gameId}/lobby`);
+    }
+
+    function onStartError({ message }) {
+      dispatch(setStartError(message));
     }
 
     socket.on("connect", onConnect);
@@ -81,6 +90,7 @@ export function useSocketEvents(gameId) {
     socket.on("game:paused", onGamePaused);
     socket.on("game:resumed", onGameResumed);
     socket.on("game:restarted", onGameRestarted);
+    socket.on("start:error", onStartError);
 
     if (socket.connected) {
       dispatch(setPlayerId(socket.id));
@@ -97,6 +107,7 @@ export function useSocketEvents(gameId) {
       socket.off("game:paused", onGamePaused);
       socket.off("game:resumed", onGameResumed);
       socket.off("game:restarted", onGameRestarted);
+      socket.off("start:error", onStartError);
     };
   }, [dispatch, navigate, gameId]);
 }

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "pol-1",
+    "prompt": "How many members does the United States Senate have?",
+    "options": ["50", "100", "435", "535"],
+    "correctAnswer": "100"
+  },
+  {
+    "id": "pol-2",
+    "prompt": "In which city is the United Nations headquarters located?",
+    "options": ["Washington D.C.", "Geneva", "London", "New York"],
+    "correctAnswer": "New York"
+  },
+  {
+    "id": "pol-3",
+    "prompt": "What does NATO stand for?",
+    "options": [
+      "National Atlantic Treaty Organisation",
+      "North Atlantic Treaty Organization",
+      "Northern Alliance Treaty Operation",
+      "North American Treaty Organisation"
+    ],
+    "correctAnswer": "North Atlantic Treaty Organization"
+  },
+  {
+    "id": "pol-4",
+    "prompt": "How many permanent members does the UN Security Council have?",
+    "options": ["3", "4", "5", "6"],
+    "correctAnswer": "5"
+  },
+  {
+    "id": "pol-5",
+    "prompt": "What is the minimum age required to become President of the United States?",
+    "options": ["30", "35", "40", "45"],
+    "correctAnswer": "35"
+  },
+  {
+    "id": "pol-6",
+    "prompt": "Which country was the first to grant women the right to vote nationally?",
+    "options": ["Australia", "United States", "New Zealand", "United Kingdom"],
+    "correctAnswer": "New Zealand"
+  },
+  {
+    "id": "pol-7",
+    "prompt": "What is the name of the UK's parliament building?",
+    "options": ["Buckingham Palace", "Westminster Abbey", "10 Downing Street", "Palace of Westminster"],
+    "correctAnswer": "Palace of Westminster"
+  },
+  {
+    "id": "pol-8",
+    "prompt": "How many amendments does the United States Constitution currently have?",
+    "options": ["10", "17", "27", "33"],
+    "correctAnswer": "27"
+  },
+  {
+    "id": "pol-9",
+    "prompt": "Who was the first woman to serve as Prime Minister of the United Kingdom?",
+    "options": ["Theresa May", "Margaret Thatcher", "Elizabeth II", "Jacinda Ardern"],
+    "correctAnswer": "Margaret Thatcher"
+  },
+  {
+    "id": "pol-10",
+    "prompt": "Which body is the legislative branch of the European Union?",
+    "options": ["European Commission", "European Council", "European Parliament", "European Court of Justice"],
+    "correctAnswer": "European Parliament"
+  },
+  {
+    "id": "pol-11",
+    "prompt": "In which year was the United Nations founded?",
+    "options": ["1943", "1945", "1948", "1951"],
+    "correctAnswer": "1945"
+  },
+  {
+    "id": "pol-12",
+    "prompt": "What term describes a government system where citizens vote directly on laws?",
+    "options": ["Republic", "Oligarchy", "Direct democracy", "Constitutional monarchy"],
+    "correctAnswer": "Direct democracy"
+  }
+]

@@ -10,7 +10,7 @@ export default function ResultsScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { lastRoundResults, players, isHost, endReason } = useSelector((s) => s.game);
+  const { lastRoundResults, players, isHost, endReason, genre } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
 
@@ -35,6 +35,11 @@ export default function ResultsScreen() {
         <h1 className="text-4xl font-extrabold text-indigo-400">
           {endReason === "host_ended" ? "Game Ended Early" : "Game Over!"}
         </h1>
+        {genre && (
+          <p className="mt-1 text-indigo-300 text-sm">
+            Category: <span className="font-semibold capitalize">{genre}</span>
+          </p>
+        )}
         {isTie || !winnerId ? (
           <p className="mt-2 text-yellow-400 font-semibold text-lg">
             {sorted.length > 0 && topScore === 0 ? "No winner" : "It's a tie!"}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "geo-1",
+    "prompt": "What is the capital of France?",
+    "options": ["Berlin", "Madrid", "Paris", "Rome"],
+    "correctAnswer": "Paris"
+  },
+  {
+    "id": "geo-2",
+    "prompt": "What is the largest ocean on Earth?",
+    "options": ["Atlantic", "Indian", "Arctic", "Pacific"],
+    "correctAnswer": "Pacific"
+  },
+  {
+    "id": "geo-3",
+    "prompt": "What is the tallest mountain in the world?",
+    "options": ["K2", "Mount Kilimanjaro", "Mount Everest", "Mont Blanc"],
+    "correctAnswer": "Mount Everest"
+  },
+  {
+    "id": "geo-4",
+    "prompt": "Which country has the largest land area in the world?",
+    "options": ["China", "Canada", "United States", "Russia"],
+    "correctAnswer": "Russia"
+  },
+  {
+    "id": "geo-5",
+    "prompt": "What is the capital city of Australia?",
+    "options": ["Sydney", "Melbourne", "Canberra", "Brisbane"],
+    "correctAnswer": "Canberra"
+  },
+  {
+    "id": "geo-6",
+    "prompt": "On which continent is Egypt located?",
+    "options": ["Asia", "Europe", "Africa", "Middle East"],
+    "correctAnswer": "Africa"
+  },
+  {
+    "id": "geo-7",
+    "prompt": "What is the smallest country in the world by area?",
+    "options": ["Monaco", "San Marino", "Liechtenstein", "Vatican City"],
+    "correctAnswer": "Vatican City"
+  },
+  {
+    "id": "geo-8",
+    "prompt": "Which country has the most natural lakes in the world?",
+    "options": ["Finland", "Russia", "United States", "Canada"],
+    "correctAnswer": "Canada"
+  },
+  {
+    "id": "geo-9",
+    "prompt": "What ocean lies between Europe and North America?",
+    "options": ["Pacific", "Indian", "Arctic", "Atlantic"],
+    "correctAnswer": "Atlantic"
+  },
+  {
+    "id": "geo-10",
+    "prompt": "What is the longest river in the world?",
+    "options": ["Amazon", "Yangtze", "Mississippi", "Nile"],
+    "correctAnswer": "Nile"
+  },
+  {
+    "id": "geo-11",
+    "prompt": "Which African country has the largest population?",
+    "options": ["South Africa", "Ethiopia", "Egypt", "Nigeria"],
+    "correctAnswer": "Nigeria"
+  },
+  {
+    "id": "geo-12",
+    "prompt": "What is the capital of Japan?",
+    "options": ["Osaka", "Kyoto", "Tokyo", "Hiroshima"],
+    "correctAnswer": "Tokyo"
+  }
+]

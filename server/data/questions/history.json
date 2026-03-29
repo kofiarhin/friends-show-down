@@ -1,0 +1,74 @@
+[
+  {
+    "id": "his-1",
+    "prompt": "In what year did World War II end?",
+    "options": ["1943", "1944", "1945", "1946"],
+    "correctAnswer": "1945"
+  },
+  {
+    "id": "his-2",
+    "prompt": "Who was the first person to walk on the moon?",
+    "options": ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "John Glenn"],
+    "correctAnswer": "Neil Armstrong"
+  },
+  {
+    "id": "his-3",
+    "prompt": "In which year did the Berlin Wall fall?",
+    "options": ["1987", "1988", "1989", "1991"],
+    "correctAnswer": "1989"
+  },
+  {
+    "id": "his-4",
+    "prompt": "In which year did World War I begin?",
+    "options": ["1912", "1913", "1914", "1915"],
+    "correctAnswer": "1914"
+  },
+  {
+    "id": "his-5",
+    "prompt": "In what year did the Titanic sink?",
+    "options": ["1910", "1911", "1912", "1913"],
+    "correctAnswer": "1912"
+  },
+  {
+    "id": "his-6",
+    "prompt": "Who was the first woman to win a Nobel Prize?",
+    "options": ["Florence Nightingale", "Marie Curie", "Rosalind Franklin", "Ada Lovelace"],
+    "correctAnswer": "Marie Curie"
+  },
+  {
+    "id": "his-7",
+    "prompt": "Who is credited with inventing the telephone?",
+    "options": ["Thomas Edison", "Nikola Tesla", "Guglielmo Marconi", "Alexander Graham Bell"],
+    "correctAnswer": "Alexander Graham Bell"
+  },
+  {
+    "id": "his-8",
+    "prompt": "In which year did the French Revolution begin?",
+    "options": ["1776", "1783", "1789", "1799"],
+    "correctAnswer": "1789"
+  },
+  {
+    "id": "his-9",
+    "prompt": "Which empire did Julius Caesar lead?",
+    "options": ["Greek Empire", "Roman Empire", "Ottoman Empire", "Byzantine Empire"],
+    "correctAnswer": "Roman Empire"
+  },
+  {
+    "id": "his-10",
+    "prompt": "Who was the first President of the United States?",
+    "options": ["John Adams", "Thomas Jefferson", "Benjamin Franklin", "George Washington"],
+    "correctAnswer": "George Washington"
+  },
+  {
+    "id": "his-11",
+    "prompt": "In what year did Christopher Columbus first reach the Americas?",
+    "options": ["1488", "1490", "1492", "1498"],
+    "correctAnswer": "1492"
+  },
+  {
+    "id": "his-12",
+    "prompt": "Which ancient wonder was located in Alexandria, Egypt?",
+    "options": ["The Colossus", "The Hanging Gardens", "The Lighthouse", "The Statue of Zeus"],
+    "correctAnswer": "The Lighthouse"
+  }
+]

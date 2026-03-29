@@ -1,0 +1,74 @@
+[
+  {
+    "id": "sci-1",
+    "prompt": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+    "correctAnswer": "Mars"
+  },
+  {
+    "id": "sci-2",
+    "prompt": "How many bones are in the adult human body?",
+    "options": ["196", "206", "216", "226"],
+    "correctAnswer": "206"
+  },
+  {
+    "id": "sci-3",
+    "prompt": "What is the chemical symbol for gold?",
+    "options": ["Go", "Gd", "Au", "Ag"],
+    "correctAnswer": "Au"
+  },
+  {
+    "id": "sci-4",
+    "prompt": "What is the fastest land animal?",
+    "options": ["Lion", "Cheetah", "Greyhound", "Pronghorn"],
+    "correctAnswer": "Cheetah"
+  },
+  {
+    "id": "sci-5",
+    "prompt": "What gas do plants absorb from the atmosphere during photosynthesis?",
+    "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
+    "correctAnswer": "Carbon dioxide"
+  },
+  {
+    "id": "sci-6",
+    "prompt": "How many chromosomes are in a typical human body cell?",
+    "options": ["23", "44", "46", "48"],
+    "correctAnswer": "46"
+  },
+  {
+    "id": "sci-7",
+    "prompt": "What is the powerhouse of the cell?",
+    "options": ["Nucleus", "Ribosome", "Mitochondria", "Golgi apparatus"],
+    "correctAnswer": "Mitochondria"
+  },
+  {
+    "id": "sci-8",
+    "prompt": "What is the atomic number of carbon?",
+    "options": ["4", "6", "8", "12"],
+    "correctAnswer": "6"
+  },
+  {
+    "id": "sci-9",
+    "prompt": "Which planet in our solar system has the most confirmed moons?",
+    "options": ["Jupiter", "Uranus", "Neptune", "Saturn"],
+    "correctAnswer": "Saturn"
+  },
+  {
+    "id": "sci-10",
+    "prompt": "What is the approximate speed of light?",
+    "options": ["300 km/s", "3,000 km/s", "300,000 km/s", "3,000,000 km/s"],
+    "correctAnswer": "300,000 km/s"
+  },
+  {
+    "id": "sci-11",
+    "prompt": "What is the most abundant gas in Earth's atmosphere?",
+    "options": ["Oxygen", "Carbon dioxide", "Hydrogen", "Nitrogen"],
+    "correctAnswer": "Nitrogen"
+  },
+  {
+    "id": "sci-12",
+    "prompt": "How many sides does a hexagon have?",
+    "options": ["5", "6", "7", "8"],
+    "correctAnswer": "6"
+  }
+]

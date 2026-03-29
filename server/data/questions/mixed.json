@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mix-1",
+    "prompt": "What is the capital of France?",
+    "options": ["Berlin", "Madrid", "Paris", "Rome"],
+    "correctAnswer": "Paris"
+  },
+  {
+    "id": "mix-2",
+    "prompt": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+    "correctAnswer": "Mars"
+  },
+  {
+    "id": "mix-3",
+    "prompt": "How many sides does a hexagon have?",
+    "options": ["5", "6", "7", "8"],
+    "correctAnswer": "6"
+  },
+  {
+    "id": "mix-4",
+    "prompt": "What is the largest ocean on Earth?",
+    "options": ["Atlantic", "Indian", "Arctic", "Pacific"],
+    "correctAnswer": "Pacific"
+  },
+  {
+    "id": "mix-5",
+    "prompt": "Who wrote Romeo and Juliet?",
+    "options": ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+    "correctAnswer": "William Shakespeare"
+  },
+  {
+    "id": "mix-6",
+    "prompt": "What is the chemical symbol for gold?",
+    "options": ["Go", "Gd", "Au", "Ag"],
+    "correctAnswer": "Au"
+  },
+  {
+    "id": "mix-7",
+    "prompt": "How many bones are in the adult human body?",
+    "options": ["196", "206", "216", "226"],
+    "correctAnswer": "206"
+  },
+  {
+    "id": "mix-8",
+    "prompt": "What is the fastest land animal?",
+    "options": ["Lion", "Cheetah", "Greyhound", "Pronghorn"],
+    "correctAnswer": "Cheetah"
+  },
+  {
+    "id": "mix-9",
+    "prompt": "In what year did World War II end?",
+    "options": ["1943", "1944", "1945", "1946"],
+    "correctAnswer": "1945"
+  },
+  {
+    "id": "mix-10",
+    "prompt": "Who painted the Mona Lisa?",
+    "options": ["Michelangelo", "Raphael", "Leonardo da Vinci", "Caravaggio"],
+    "correctAnswer": "Leonardo da Vinci"
+  },
+  {
+    "id": "mix-11",
+    "prompt": "How many players are on a standard football (soccer) team?",
+    "options": ["9", "10", "11", "12"],
+    "correctAnswer": "11"
+  },
+  {
+    "id": "mix-12",
+    "prompt": "What is the tallest mountain in the world?",
+    "options": ["K2", "Mount Kilimanjaro", "Mount Everest", "Mont Blanc"],
+    "correctAnswer": "Mount Everest"
+  }
+]

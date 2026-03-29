@@ -9,7 +9,7 @@ const {
   clearExpiryTimer,
 } = require("../../store/gameStore");
 const { shuffleArray } = require("../../utils/shuffleArray");
-const questions = require("../../data/questions.json");
+const { getQuestionsByGenre, MIN_QUESTIONS_PER_GENRE } = require("../../utils/questionBank");
 
 const WAITING_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 const ENDED_EXPIRY_MS = 15 * 60 * 1000;   // 15 min
@@ -95,7 +95,7 @@ function registerGameHandlers(io, socket) {
       socket.join(gameId);
       clearExpiryTimer(gameId);
       setExpiryTimer(gameId, WAITING_EXPIRY_MS);
-      io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players) });
+      io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players), genre: game.config.genre });
       return;
     }
 
@@ -128,7 +128,7 @@ function registerGameHandlers(io, socket) {
     clearExpiryTimer(gameId);
     setExpiryTimer(gameId, WAITING_EXPIRY_MS);
 
-    io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players) });
+    io.to(gameId).emit("lobby:updated", { players: sanitizePlayers(game.players), genre: game.config.genre });
   });
 
   // game:start — host starts the game
@@ -140,10 +140,19 @@ function registerGameHandlers(io, socket) {
     if (game.status !== "waiting") return;
     if (game.players.filter((p) => p.connected).length < 2) return;
 
+    const genre = game.config.genre;
+    const pool = getQuestionsByGenre(genre);
+
+    if (pool.length < MIN_QUESTIONS_PER_GENRE) {
+      return socket.emit("start:error", {
+        message: `Not enough questions for this category. Try a different one.`,
+      });
+    }
+
     game.status = "in-progress";
     clearExpiryTimer(gameId);
 
-    const shuffledQuestions = shuffleArray(questions);
+    const shuffledQuestions = shuffleArray(pool);
     game.session.questions = shuffledQuestions;
     game.session.totalQuestions = shuffledQuestions.length;
     game.session.current = 0;
@@ -215,7 +224,7 @@ function registerGameHandlers(io, socket) {
 
     setExpiryTimer(gameId, WAITING_EXPIRY_MS);
 
-    io.to(gameId).emit("game:restarted", { players: sanitizePlayers(game.players) });
+    io.to(gameId).emit("game:restarted", { players: sanitizePlayers(game.players), genre: game.config.genre });
   });
 
   // game:close-room — host closes the room from post-game screen
@@ -379,6 +388,7 @@ function buildGameEnd(game) {
     winnerId,
     winnerNickname,
     endReason: game.endReason ?? "completed",
+    genre: game.config.genre,
   };
 }
 

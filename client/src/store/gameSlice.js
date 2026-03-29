@@ -5,6 +5,7 @@ const initialState = {
   playerId: null,
   nickname: null,
   isHost: false,
+  genre: null,               // slug string | null — persists across restarts
   status: "idle", // idle | waiting | in-progress | ended
   players: [],
   currentQuestion: null, // { questionNumber, totalQuestions, question, timeLimit }
@@ -13,6 +14,7 @@ const initialState = {
   playState: "running",      // "running" | "paused"
   endReason: null,           // "completed" | "host_ended" | null
   lastRoundResults: null,    // snapshot object or null
+  startError: null,          // error message from start:error event | null
 };
 
 const gameSlice = createSlice({
@@ -20,11 +22,18 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     setGame(state, action) {
-      const { gameId, playerId, nickname, isHost } = action.payload;
+      const { gameId, playerId, nickname, isHost, genre } = action.payload;
       state.gameId = gameId;
       if (playerId !== undefined) state.playerId = playerId;
       if (nickname !== undefined) state.nickname = nickname;
       if (isHost !== undefined) state.isHost = isHost;
+      if (genre !== undefined) state.genre = genre;
+    },
+    setGenre(state, action) {
+      state.genre = action.payload;
+    },
+    setStartError(state, action) {
+      state.startError = action.payload;
     },
     setPlayerId(state, action) {
       state.playerId = action.payload;
@@ -49,6 +58,7 @@ const gameSlice = createSlice({
       state.hasAnswered = false;
       state.lastQuestionResult = null;
       state.playState = "running";
+      state.startError = null;
     },
     setQuestionResult(state, action) {
       state.lastQuestionResult = action.payload;
@@ -82,6 +92,7 @@ const gameSlice = createSlice({
         playerId: state.playerId,
         nickname: state.nickname,
         isHost: state.isHost,
+        genre: state.genre,
         status: "waiting",
       };
     },
@@ -107,6 +118,8 @@ export const {
   resumeQuestion,
   resetRound,
   resetGame,
+  setGenre,
+  setStartError,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

@@ -1,9 +1,12 @@
 const games = new Map();
 
-function createGame(gameId, hostId) {
+function createGame(gameId, hostId, genre) {
   const game = {
     gameId,
     hostId,
+    config: {
+      genre,
+    },
     status: "waiting",
     players: [],
     session: {
