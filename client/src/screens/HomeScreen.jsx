@@ -40,7 +40,14 @@ export default function HomeScreen() {
     mutationFn: createGame,
     onSuccess: (data, genre) => {
       dispatch(resetGame());
-      dispatch(setGame({ gameId: data.gameId, isHost: true, genre }));
+      dispatch(
+        setGame({
+          gameId: data.gameId,
+          isHost: true,
+          hostToken: data.hostToken,
+          genre,
+        }),
+      );
       navigate(`/game/${data.gameId}/join`);
     },
   });
@@ -63,7 +70,8 @@ export default function HomeScreen() {
       setJoinError("Enter a game ID or link.");
       return;
     }
-    const match = raw.match(/\/game\/([^/]+)\//) || raw.match(/^([A-Za-z0-9_-]+)$/);
+    const match =
+      raw.match(/\/game\/([^/]+)\//) || raw.match(/^([A-Za-z0-9_-]+)$/);
     if (!match) {
       setJoinError("Invalid game ID or link.");
       return;
@@ -95,7 +103,9 @@ export default function HomeScreen() {
           </button>
         ) : (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-400 text-center">Choose a category</p>
+            <p className="text-sm text-gray-400 text-center">
+              Choose a category
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {GENRES.map(({ slug, label }) => (
                 <button
@@ -113,7 +123,9 @@ export default function HomeScreen() {
             </div>
 
             {mutation.isError && (
-              <p className="text-red-400 text-sm text-center">{mutation.error.message}</p>
+              <p className="text-red-400 text-sm text-center">
+                {mutation.error.message}
+              </p>
             )}
 
             <button

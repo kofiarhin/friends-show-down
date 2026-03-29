@@ -1,9 +1,10 @@
 const games = new Map();
 
-function createGame(gameId, hostId, genre) {
+function createGame(gameId, hostId, genre, hostToken = null) {
   const game = {
     gameId,
     hostId,
+    hostToken,
     config: {
       genre,
     },

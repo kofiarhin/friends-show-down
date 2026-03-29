@@ -13,4 +13,12 @@ app.get("/api/health", (req, res) => {
   res.json({ message: "ok" });
 });
 
+app.use((err, req, res, next) => {
+  if (err && err.type === "entity.parse.failed") {
+    return res.status(400).json({ message: "Malformed JSON." });
+  }
+
+  return next(err);
+});
+
 module.exports = app;

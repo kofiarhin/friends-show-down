@@ -18,6 +18,7 @@ const initial = {
   playerId: null,
   nickname: null,
   isHost: false,
+  hostToken: null,
   status: "idle",
   genre: null,
   players: [],
@@ -38,14 +39,20 @@ describe("gameSlice", () => {
     expect(reducer(undefined, { type: "@@INIT" })).toEqual(initial);
   });
 
-  it("setGame updates gameId, nickname, isHost", () => {
+  it("setGame updates gameId, nickname, isHost, and hostToken", () => {
     const state = reducer(
       undefined,
-      setGame({ gameId: "abc", nickname: "Alice", isHost: true }),
+      setGame({
+        gameId: "abc",
+        nickname: "Alice",
+        isHost: true,
+        hostToken: "token-123",
+      }),
     );
     expect(state.gameId).toBe("abc");
     expect(state.nickname).toBe("Alice");
     expect(state.isHost).toBe(true);
+    expect(state.hostToken).toBe("token-123");
   });
 
   it("setPlayerId updates playerId", () => {
@@ -195,7 +202,12 @@ describe("gameSlice", () => {
   it("resetGame returns initial state", () => {
     const dirty = reducer(
       undefined,
-      setGame({ gameId: "abc", nickname: "X", isHost: true }),
+      setGame({
+        gameId: "abc",
+        nickname: "X",
+        isHost: true,
+        hostToken: "token-123",
+      }),
     );
     const reset = reducer(dirty, resetGame());
     expect(reset).toEqual(initial);

@@ -22,21 +22,35 @@ const ROUND_TRANSITION_MS =
 
 function registerGameHandlers(io, socket) {
   // game:join — player registers in a session
-  socket.on("game:join", ({ gameId, nickname, isHost }) => {
+  socket.on("game:join", (payload) => {
+    const parsedPayload = parseJoinPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("join:error", { message: "Invalid join payload." });
+    }
+
+    const { gameId, nickname, hostToken } = parsedPayload;
     const game = getGame(gameId);
 
     if (!game) {
       return socket.emit("join:error", { message: "Game not found." });
     }
 
+    const hasValidHostToken = Boolean(hostToken) && hostToken === game.hostToken;
+
     if (game.status === "in-progress") {
       const existing = getPlayerByNickname(gameId, nickname);
       if (existing && !existing.connected) {
         // Reconnect to in-progress game
         const wasHost = existing.playerId === game.hostId;
+        if (wasHost && !hasValidHostToken) {
+          return socket.emit("join:error", {
+            message: "Host reconnection requires a valid host token.",
+          });
+        }
+
         existing.playerId = socket.id;
         existing.connected = true;
-        if (wasHost || isHost) {
+        if (wasHost) {
           game.hostId = socket.id;
         }
 
@@ -79,9 +93,15 @@ function registerGameHandlers(io, socket) {
       if (existing && !existing.connected) {
         // Reconnect to ended game
         const wasHost = existing.playerId === game.hostId;
+        if (wasHost && !hasValidHostToken) {
+          return socket.emit("join:error", {
+            message: "Host reconnection requires a valid host token.",
+          });
+        }
+
         existing.playerId = socket.id;
         existing.connected = true;
-        if (wasHost || isHost) {
+        if (wasHost) {
           game.hostId = socket.id;
         }
         socket.join(gameId);
@@ -121,9 +141,15 @@ function registerGameHandlers(io, socket) {
     const existing = getPlayerByNickname(gameId, nickname);
     if (existing && !existing.connected) {
       const wasHost = existing.playerId === game.hostId;
+      if (wasHost && !hasValidHostToken) {
+        return socket.emit("join:error", {
+          message: "Host reconnection requires a valid host token.",
+        });
+      }
+
       existing.playerId = socket.id;
       existing.connected = true;
-      if (wasHost || isHost) game.hostId = socket.id;
+      if (wasHost) game.hostId = socket.id;
 
       socket.join(gameId);
       clearExpiryTimer(gameId);
@@ -156,10 +182,7 @@ function registerGameHandlers(io, socket) {
     addPlayer(gameId, player);
     socket.join(gameId);
 
-    if (!game.hostId) {
-      game.hostId = socket.id;
-    }
-    if (isHost) {
+    if (!game.hostId && hasValidHostToken) {
       game.hostId = socket.id;
     }
 
@@ -173,7 +196,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:start — host starts the game
-  socket.on("game:start", ({ gameId }) => {
+  socket.on("game:start", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("start:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
 
     if (!game) return;
@@ -202,7 +231,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:end-early — host ends from lobby (cancel) or from in-progress
-  socket.on("game:end-early", ({ gameId }) => {
+  socket.on("game:end-early", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -252,7 +287,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:restart — host restarts a new round in the same room
-  socket.on("game:restart", ({ gameId }) => {
+  socket.on("game:restart", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -298,7 +339,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:close-room — host closes the room from post-game screen
-  socket.on("game:close-room", ({ gameId }) => {
+  socket.on("game:close-room", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -316,7 +363,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // room:set-genre — host changes genre while room is in ended state
-  socket.on("room:set-genre", ({ gameId, genre }) => {
+  socket.on("room:set-genre", (payload) => {
+    const parsedPayload = parseSetGenrePayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId, genre } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -336,7 +389,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:pause — host pauses an active question
-  socket.on("game:pause", ({ gameId }) => {
+  socket.on("game:pause", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -368,7 +427,13 @@ function registerGameHandlers(io, socket) {
   });
 
   // game:resume — host resumes a paused question
-  socket.on("game:resume", ({ gameId }) => {
+  socket.on("game:resume", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
     const game = getGame(gameId);
     if (!game)
       return socket.emit("action:error", { message: "Game not found." });
@@ -399,6 +464,57 @@ function registerGameHandlers(io, socket) {
 
     io.to(gameId).emit("game:resumed", { remainingTimeMs });
   });
+}
+
+function parseJoinPayload(payload) {
+  if (!isRecord(payload)) return null;
+
+  const gameId = getTrimmedString(payload.gameId);
+  const nickname = getTrimmedString(payload.nickname);
+  const hostToken = getOptionalTrimmedString(payload.hostToken);
+
+  if (!gameId || !nickname) {
+    return null;
+  }
+
+  return {
+    gameId,
+    nickname,
+    hostToken,
+  };
+}
+
+function parseGameIdPayload(payload) {
+  if (!isRecord(payload)) return null;
+
+  const gameId = getTrimmedString(payload.gameId);
+  if (!gameId) return null;
+
+  return { gameId };
+}
+
+function parseSetGenrePayload(payload) {
+  if (!isRecord(payload)) return null;
+
+  const gameId = getTrimmedString(payload.gameId);
+  const genre = getTrimmedString(payload.genre);
+
+  if (!gameId || !genre) return null;
+
+  return { gameId, genre };
+}
+
+function getTrimmedString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getOptionalTrimmedString(value) {
+  if (value === undefined) return null;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function emitQuestion(io, gameId) {

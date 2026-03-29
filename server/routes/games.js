@@ -1,4 +1,5 @@
 const express = require("express");
+const { randomUUID } = require("crypto");
 const router = express.Router();
 const { createGame, getGame } = require("../store/gameStore");
 const { generateId } = require("../utils/generateId");
@@ -7,7 +8,11 @@ const config = require("../config");
 
 // POST /api/games — create a new game session
 router.post("/", (req, res) => {
-  const { genre } = req.body;
+  if (!isRecord(req.body)) {
+    return res.status(400).json({ message: "Invalid request body." });
+  }
+
+  const genre = typeof req.body.genre === "string" ? req.body.genre.trim() : "";
 
   if (!genre) {
     return res.status(400).json({ message: "Genre is required." });
@@ -21,16 +26,23 @@ router.post("/", (req, res) => {
     gameId = generateId();
   } while (getGame(gameId));
 
-  createGame(gameId, null, genre); // hostId assigned on socket join
+  const hostToken = randomUUID().replace(/-/g, "");
+
+  createGame(gameId, null, genre, hostToken); // hostId assigned on socket join
 
   const gameUrl = `${config.clientUrl}/game/${gameId}/join`;
 
-  return res.status(201).json({ gameId, gameUrl });
+  return res.status(201).json({ gameId, gameUrl, hostToken });
 });
 
 // GET /api/games/:gameId — validate a game exists and is joinable
 router.get("/:gameId", (req, res) => {
-  const { gameId } = req.params;
+  const gameId = typeof req.params.gameId === "string" ? req.params.gameId.trim() : "";
+
+  if (!gameId) {
+    return res.status(400).json({ message: "Game ID is required." });
+  }
+
   const game = getGame(gameId);
 
   if (!game) {
@@ -48,5 +60,9 @@ router.get("/:gameId", (req, res) => {
     genre: game.config.genre,
   });
 });
+
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
 
 module.exports = router;

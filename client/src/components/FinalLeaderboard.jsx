@@ -10,22 +10,32 @@ export default function FinalLeaderboard({ players }) {
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      {ranked.map((p) => (
-        <div
-          key={p.playerId}
-          className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
-            p.score === topScore
-              ? "bg-indigo-900/60 border border-indigo-600"
-              : "bg-gray-800"
-          }`}
-        >
-          <span className="text-gray-400 font-mono w-6 text-sm">
-            #{p.rank}
-          </span>
-          <span className="flex-1 font-semibold">{p.nickname}</span>
-          <span className="font-bold text-indigo-300">{p.score} pts</span>
-        </div>
-      ))}
+      {ranked.map((p) => {
+        const badge =
+          p.rank === 1
+            ? "🥇"
+            : p.rank === 2
+              ? "🥈"
+              : p.rank === 3
+                ? "🥉"
+                : null;
+        return (
+          <div
+            key={p.playerId}
+            className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
+              p.score === topScore
+                ? "bg-indigo-900/60 border border-indigo-600"
+                : "bg-gray-800"
+            } ${p.rank === 1 ? "ring-1 ring-yellow-400/20" : ""}`}
+          >
+            <span className="text-gray-400 font-mono w-6 text-sm">
+              {badge ?? `#${p.rank}`}
+            </span>
+            <span className="flex-1 font-semibold">{p.nickname}</span>
+            <span className="font-bold text-indigo-300">{p.score} pts</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

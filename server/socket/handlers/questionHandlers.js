@@ -2,7 +2,13 @@ const { getGame, updateScore } = require("../../store/gameStore");
 const { endQuestion, sanitizePlayers } = require("./gameHandlers");
 
 function registerQuestionHandlers(io, socket) {
-  socket.on("answer:submit", ({ gameId, questionNumber, answer }) => {
+  socket.on("answer:submit", (payload) => {
+    const parsedPayload = parseAnswerPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("answer:rejected", { reason: "Invalid payload." });
+    }
+
+    const { gameId, questionNumber, answer } = parsedPayload;
     const game = getGame(gameId);
     if (!game) return;
 
@@ -47,6 +53,34 @@ function registerQuestionHandlers(io, socket) {
       socket.emit("answer:rejected", { reason: "Incorrect." });
     }
   });
+}
+
+function parseAnswerPayload(payload) {
+  if (!isRecord(payload)) return null;
+
+  const gameId = getTrimmedString(payload.gameId);
+  const questionNumber = Number.isInteger(payload.questionNumber)
+    ? payload.questionNumber
+    : null;
+  const answer = typeof payload.answer === "string" ? payload.answer : null;
+
+  if (!gameId || !questionNumber || !answer || !answer.trim()) {
+    return null;
+  }
+
+  return {
+    gameId,
+    questionNumber,
+    answer,
+  };
+}
+
+function getTrimmedString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 module.exports = { registerQuestionHandlers };

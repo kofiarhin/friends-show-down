@@ -4,6 +4,7 @@ const {
   getGame,
   deleteGame,
 } = require("../../store/gameStore");
+const { registerQuestionHandlers } = require("./questionHandlers");
 const { shuffleArray } = require("../../utils/shuffleArray");
 const questions = require("../../data/questions.json");
 
@@ -29,6 +30,36 @@ function setupGame() {
   game.questionSubmissions = new Set();
 
   return game;
+}
+
+function makeSocket(id = "socket-1") {
+  const handlers = new Map();
+  const emitted = [];
+  return {
+    id,
+    emitted,
+    on(event, cb) {
+      handlers.set(event, cb);
+    },
+    emit(event, payload) {
+      emitted.push({ event, payload });
+    },
+    trigger(event, payload) {
+      const cb = handlers.get(event);
+      if (!cb) throw new Error(`No handler for ${event}`);
+      cb(payload);
+    },
+  };
+}
+
+function makeIo() {
+  return {
+    to() {
+      return {
+        emit() {},
+      };
+    },
+  };
 }
 
 describe("questionHandlers logic", () => {
@@ -100,5 +131,23 @@ describe("questionHandlers logic", () => {
     game.questionSubmissions = new Set();
     game.questionAnswered = false;
     expect(game.questionSubmissions.size).toBe(0);
+  });
+});
+
+describe("questionHandlers payload validation", () => {
+  afterEach(() => deleteGame(GAME_ID));
+
+  it("rejects malformed answer payloads", () => {
+    setupGame();
+    const io = makeIo();
+    const socket = makeSocket("host-id");
+
+    registerQuestionHandlers(io, socket);
+    socket.trigger("answer:submit", null);
+
+    expect(socket.emitted).toContainEqual({
+      event: "answer:rejected",
+      payload: { reason: "Invalid payload." },
+    });
   });
 });

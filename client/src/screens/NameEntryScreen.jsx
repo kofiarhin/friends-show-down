@@ -18,13 +18,20 @@ export default function NameEntryScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isHost = useSelector((s) => s.game.isHost);
+  const { isHost, hostToken } = useSelector((s) => ({
+    isHost: s.game.isHost,
+    hostToken: s.game.hostToken,
+  }));
 
   const [nickname, setNickname] = useState("");
   const [joinError, setJoinError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: gameData, error: gameError, isLoading } = useQuery({
+  const {
+    data: gameData,
+    error: gameError,
+    isLoading,
+  } = useQuery({
     queryKey: ["game", gameId],
     queryFn: () => fetchGame(gameId),
     retry: false,
@@ -72,10 +79,12 @@ export default function NameEntryScreen() {
     }
 
     setSubmitting(true);
-    dispatch(setGame({ gameId, nickname: trimmed, isHost }));
+    dispatch(setGame({ gameId, nickname: trimmed, isHost, hostToken }));
     if (socket.connected) dispatch(setPlayerId(socket.id));
 
-    socket.emit("game:join", { gameId, nickname: trimmed, isHost });
+    const payload = { gameId, nickname: trimmed };
+    if (isHost && hostToken) payload.hostToken = hostToken;
+    socket.emit("game:join", payload);
   }
 
   if (isLoading) {
@@ -103,12 +112,16 @@ export default function NameEntryScreen() {
         </p>
         {gameData?.genre && (
           <p className="mt-1 text-indigo-300 text-sm">
-            Category: <span className="font-semibold capitalize">{gameData.genre}</span>
+            Category:{" "}
+            <span className="font-semibold capitalize">{gameData.genre}</span>
           </p>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm flex flex-col gap-4"
+      >
         <input
           type="text"
           value={nickname}

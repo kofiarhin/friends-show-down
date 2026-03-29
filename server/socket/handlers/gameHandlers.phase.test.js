@@ -75,7 +75,7 @@ describe("gameHandlers phase transitions", () => {
     expect(events[0].payload.roundPhase).toBe("question_result");
     expect(events[1].payload.roundPhase).toBe("question_hype");
 
-    jest.advanceTimersByTime(3000);
+    jest.advanceTimersByTime(5000);
 
     expect(events.map((e) => e.event)).toEqual(["question:end", "round:phase", "question:start"]);
     expect(events[2].payload.roundPhase).toBe("question_live");
@@ -90,7 +90,7 @@ describe("gameHandlers phase transitions", () => {
 
     expect(events.map((e) => e.event)).toEqual(["question:end"]);
 
-    jest.advanceTimersByTime(3000);
+    jest.advanceTimersByTime(5000);
 
     expect(events.map((e) => e.event)).toEqual(["question:end", "game:end"]);
   });
@@ -111,7 +111,7 @@ describe("gameHandlers phase transitions", () => {
     const game = setupGame({ totalQuestions: 2 });
     game.roundPhase = "question_hype";
     game.phaseStartedAt = Date.now();
-    game.phaseEndsAt = game.phaseStartedAt + 3000;
+    game.phaseEndsAt = game.phaseStartedAt + 5000;
     game.lastQuestionResult = {
       winnerId: "host-id",
       winnerNickname: "Host",

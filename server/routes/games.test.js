@@ -3,14 +3,39 @@ const app = require("../app");
 const { getGame, deleteGame } = require("../store/gameStore");
 
 describe("POST /api/games", () => {
-  it("returns 201 with gameId and gameUrl", async () => {
-    const res = await request(app).post("/api/games");
+  it("returns 201 with gameId, gameUrl, and hostToken", async () => {
+    const res = await request(app).post("/api/games").send({ genre: "mixed" });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("gameId");
     expect(res.body).toHaveProperty("gameUrl");
+    expect(res.body).toHaveProperty("hostToken");
     expect(res.body.gameUrl).toContain(res.body.gameId);
 
     deleteGame(res.body.gameId);
+  });
+
+  it("returns 400 when genre is missing", async () => {
+    const res = await request(app).post("/api/games").send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ message: "Genre is required." });
+  });
+
+  it("returns 400 for an invalid genre", async () => {
+    const res = await request(app).post("/api/games").send({ genre: "unknown" });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ message: "Invalid genre." });
+  });
+
+  it("returns 400 for malformed JSON", async () => {
+    const res = await request(app)
+      .post("/api/games")
+      .set("Content-Type", "application/json")
+      .send('{"genre":');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ message: "Malformed JSON." });
   });
 });
 
@@ -18,7 +43,7 @@ describe("GET /api/games/:gameId", () => {
   let gameId;
 
   beforeEach(async () => {
-    const res = await request(app).post("/api/games");
+    const res = await request(app).post("/api/games").send({ genre: "mixed" });
     gameId = res.body.gameId;
   });
 

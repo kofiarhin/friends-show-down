@@ -10,7 +10,9 @@ export default function ResultsScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { lastRoundResults, players, isHost, endReason, genre } = useSelector((s) => s.game);
+  const { lastRoundResults, players, isHost, endReason, genre } = useSelector(
+    (s) => s.game,
+  );
 
   useSocketEvents(gameId);
 
@@ -22,7 +24,11 @@ export default function ResultsScreen() {
   const isTie = topPlayers.length > 1;
 
   const winnerId = lastRoundResults?.winnerId ?? null;
-  const winnerNickname = lastRoundResults?.winnerNickname ?? topPlayers[0]?.nickname;
+  const winnerNickname =
+    lastRoundResults?.winnerNickname ?? topPlayers[0]?.nickname;
+  const topScorer = sorted[0] ?? null;
+  const showCelebration =
+    !!winnerId && !isTie && endReason !== "host_ended" && topScore > 0;
 
   function handlePlayAgain() {
     dispatch(resetGame());
@@ -30,7 +36,7 @@ export default function ResultsScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 px-4 py-10">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 px-4 py-10 relative overflow-hidden">
       <div className="text-center">
         <h1 className="text-4xl font-extrabold text-indigo-400">
           {endReason === "host_ended" ? "Game Ended Early" : "Game Over!"}
@@ -49,6 +55,41 @@ export default function ResultsScreen() {
             {winnerNickname} wins!
           </p>
         )}
+      </div>
+
+      {showCelebration && (
+        <div className="results-confetti" aria-hidden="true">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <span
+              key={index}
+              className={`confetti-piece confetti-piece-${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="w-full max-w-sm">
+        <div className="mb-6 rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl">
+          <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
+            Final summary
+          </p>
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-gray-400">Top scorer</p>
+              <p className="text-2xl font-semibold text-white">
+                {topScorer?.nickname ?? "No scorer"}
+              </p>
+            </div>
+            <div className="rounded-full bg-indigo-600 px-3 py-1 text-sm font-semibold">
+              {topScore} pts
+            </div>
+          </div>
+          {isTie && topPlayers.length > 1 && (
+            <p className="mt-3 text-sm text-yellow-300">
+              Shared victory for {topPlayers.length} players.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="w-full max-w-sm">

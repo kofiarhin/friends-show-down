@@ -5,6 +5,7 @@ const initialState = {
   playerId: null,
   nickname: null,
   isHost: false,
+  hostToken: null,
   genre: null, // slug string | null — persists across restarts
   status: "idle", // idle | waiting | in-progress | ended
   players: [],
@@ -25,11 +26,13 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     setGame(state, action) {
-      const { gameId, playerId, nickname, isHost, genre } = action.payload;
+      const { gameId, playerId, nickname, isHost, hostToken, genre } =
+        action.payload;
       state.gameId = gameId;
       if (playerId !== undefined) state.playerId = playerId;
       if (nickname !== undefined) state.nickname = nickname;
       if (isHost !== undefined) state.isHost = isHost;
+      if (hostToken !== undefined) state.hostToken = hostToken;
       if (genre !== undefined) state.genre = genre;
     },
     setGenre(state, action) {
@@ -119,6 +122,7 @@ const gameSlice = createSlice({
         playerId: state.playerId,
         nickname: state.nickname,
         isHost: state.isHost,
+        hostToken: state.hostToken,
         genre: state.genre,
         status: "waiting",
       };
