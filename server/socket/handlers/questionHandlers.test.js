@@ -16,18 +16,35 @@ const GAME_ID = "q-handler-test";
 function setupGame() {
   deleteGame(GAME_ID);
   const game = createGame(GAME_ID, "host-id");
-  addPlayer(GAME_ID, { playerId: "host-id", nickname: "Host", score: 0, connected: true });
-  addPlayer(GAME_ID, { playerId: "p2-id", nickname: "Bob", score: 0, connected: true });
+  addPlayer(GAME_ID, {
+    playerId: "host-id",
+    nickname: "Host",
+    score: 0,
+    connected: true,
+  });
+  addPlayer(GAME_ID, {
+    playerId: "p2-id",
+    nickname: "Bob",
+    score: 0,
+    connected: true,
+  });
 
   game.status = "in-progress";
-  game.session.questions = shuffleArray(questions);
-  game.session.totalQuestions = questions.length;
+  const selectedQuestions = shuffleArray(questions).slice(0, 1);
+  game.session.questions = selectedQuestions;
+  game.session.totalQuestions = selectedQuestions.length;
   game.session.current = 0;
 
   const q = game.session.questions[0];
-  game.currentQuestion = { id: q.id, prompt: q.prompt, options: shuffleArray(q.options) };
+  game.currentQuestion = {
+    id: q.id,
+    prompt: q.prompt,
+    options: shuffleArray(q.options),
+  };
   game.questionAnswered = false;
   game.questionSubmissions = new Set();
+  game.roundPhase = "question_live";
+  game.playState = "running";
 
   return game;
 }
@@ -114,6 +131,82 @@ describe("questionHandlers logic", () => {
     game.questionSubmissions.add("host-id");
     // answer is wrong, so we do NOT set questionAnswered
     expect(game.questionAnswered).toBe(false);
+  });
+
+  it("ends the question immediately when all connected players submit wrong answers", () => {
+    const game = setupGame();
+    const io = makeIo();
+    const hostSocket = makeSocket("host-id");
+    const playerSocket = makeSocket("p2-id");
+
+    registerQuestionHandlers(io, hostSocket);
+    registerQuestionHandlers(io, playerSocket);
+
+    const q = game.session.questions[0];
+    const wrongAnswer = q.options.find((option) => option !== q.correctAnswer);
+
+    hostSocket.trigger("answer:submit", {
+      gameId: GAME_ID,
+      questionNumber: 1,
+      answer: wrongAnswer,
+    });
+
+    expect(game.questionAnswered).toBe(false);
+
+    playerSocket.trigger("answer:submit", {
+      gameId: GAME_ID,
+      questionNumber: 1,
+      answer: wrongAnswer,
+    });
+
+    expect(game.questionAnswered).toBe(true);
+    expect(game.roundPhase).toBe("question_result");
+    expect(playerSocket.emitted).toContainEqual({
+      event: "answer:rejected",
+      payload: { reason: "Incorrect." },
+    });
+  });
+
+  it("does not end the question early if a connected player has not submitted", () => {
+    const game = setupGame();
+    const io = makeIo();
+    const hostSocket = makeSocket("host-id");
+
+    registerQuestionHandlers(io, hostSocket);
+
+    const q = game.session.questions[0];
+    const wrongAnswer = q.options.find((option) => option !== q.correctAnswer);
+
+    hostSocket.trigger("answer:submit", {
+      gameId: GAME_ID,
+      questionNumber: 1,
+      answer: wrongAnswer,
+    });
+
+    expect(game.questionAnswered).toBe(false);
+    expect(game.questionSubmissions.size).toBe(1);
+  });
+
+  it("ignores disconnected players when determining whether all submissions are complete", () => {
+    const game = setupGame();
+    game.players.find((p) => p.playerId === "p2-id").connected = false;
+
+    const io = makeIo();
+    const hostSocket = makeSocket("host-id");
+
+    registerQuestionHandlers(io, hostSocket);
+
+    const q = game.session.questions[0];
+    const wrongAnswer = q.options.find((option) => option !== q.correctAnswer);
+
+    hostSocket.trigger("answer:submit", {
+      gameId: GAME_ID,
+      questionNumber: 1,
+      answer: wrongAnswer,
+    });
+
+    expect(game.questionAnswered).toBe(true);
+    expect(game.roundPhase).toBe("question_result");
   });
 
   it("questionSubmissions tracks all submitters", () => {

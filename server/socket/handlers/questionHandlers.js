@@ -13,7 +13,9 @@ function registerQuestionHandlers(io, socket) {
     if (!game) return;
 
     if (game.status !== "in-progress") {
-      return socket.emit("answer:rejected", { reason: "Game is not in progress." });
+      return socket.emit("answer:rejected", {
+        reason: "Game is not in progress.",
+      });
     }
 
     if (game.playState === "paused") {
@@ -21,17 +23,23 @@ function registerQuestionHandlers(io, socket) {
     }
 
     if (game.roundPhase !== "question_live") {
-      return socket.emit("answer:rejected", { reason: "Question is not live." });
+      return socket.emit("answer:rejected", {
+        reason: "Question is not live.",
+      });
     }
 
     // Question number must match current (1-based)
     if (questionNumber !== game.session.current + 1) {
-      return socket.emit("answer:rejected", { reason: "Question already over." });
+      return socket.emit("answer:rejected", {
+        reason: "Question already over.",
+      });
     }
 
     // Question already resolved
     if (game.questionAnswered) {
-      return socket.emit("answer:rejected", { reason: "Question already over." });
+      return socket.emit("answer:rejected", {
+        reason: "Question already over.",
+      });
     }
 
     // Duplicate submission check
@@ -51,8 +59,26 @@ function registerQuestionHandlers(io, socket) {
       endQuestion(io, gameId, socket.id, player?.nickname ?? null);
     } else {
       socket.emit("answer:rejected", { reason: "Incorrect." });
+      if (shouldEndQuestionEarly(game)) {
+        endQuestion(io, gameId, null, null);
+      }
     }
   });
+}
+
+function shouldEndQuestionEarly(game) {
+  if (!game || !Array.isArray(game.players) || game.players.length === 0) {
+    return false;
+  }
+
+  const connectedPlayers = game.players.filter((player) => player.connected);
+  if (connectedPlayers.length === 0) {
+    return false;
+  }
+
+  return connectedPlayers.every((player) =>
+    game.questionSubmissions.has(player.playerId),
+  );
 }
 
 function parseAnswerPayload(payload) {

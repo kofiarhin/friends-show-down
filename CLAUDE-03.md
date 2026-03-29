@@ -59,11 +59,8 @@ Root `package.json` manages both client and server. Server has no separate `pack
 - **`server/server.js`** — HTTP server + Socket.IO init
 - **`server/config.js`** — Env validation and exports (`port`, `clientUrl`, `allowedOrigins`, `questionTimeLimit`)
 - **`server/store/gameStore.js`** — In-memory `Map<gameId, Game>`. No database persistence. Games auto-expire via timers (30 min idle, 15 min post-end).
-- **`server/store/leaderboardStore.js`** — In-memory weekly leaderboard. Keyed by UTC week ID (`Map<weekId, Map<playerName, entry>>`). Populated by `recordCompletedGame()` called from game end logic. No persistence — resets on server restart.
 - **`server/routes/games.js`** — REST: `POST /api/games` (create), `GET /api/games/:gameId` (validate)
-- **`server/routes/leaderboard.js`** — REST: `GET /api/leaderboard/weekly` (current week), `GET /api/leaderboard/weekly/:weekId` (historical)
 - **`server/socket/`** — Socket.IO handlers split into `gameHandlers.js` (join, start, disconnect) and `questionHandlers.js` (answer submission, scoring)
-- **`server/utils/weekUtils.js`** — `getCurrentUtcWeekId()` and `parseWeekId()` — week IDs are UTC ISO strings (e.g. `2026-W13`)
 - **`server/data/questions.json`** — Trivia question bank
 
 ### Client
@@ -72,7 +69,6 @@ Root `package.json` manages both client and server. Server has no separate `pack
 - **`client/src/socket.js`** — Singleton Socket.IO client (auto-connects)
 - **`client/src/store/`** — Redux store; `gameSlice.js` holds all game UI state
 - **`client/src/hooks/useSocketEvents.js`** — Subscribes to all socket events, dispatches Redux actions, handles navigation
-- **`client/src/api/leaderboard.js`** — Axios calls for leaderboard REST endpoints
 - **`client/src/screens/`** — Full-page views; routing lives in `App.jsx`
 
 ### Game Flow
@@ -81,8 +77,6 @@ Root `package.json` manages both client and server. Server has no separate `pack
 HomeScreen (/) → NameEntryScreen (/game/:id/join) → LobbyScreen (/game/:id/lobby)
   → GameScreen (/game/:id/play) → ResultsScreen (/game/:id/results)
 ```
-
-`/leaderboard` is a standalone route accessible from the home screen.
 
 REST calls handle game creation and validation. All gameplay (join, start, answer, scoring, question cycling) is driven entirely by Socket.IO events.
 
@@ -104,7 +98,7 @@ REST calls handle game creation and validation. All gameplay (join, start, answe
 ### State Management
 
 - **Redux** (`gameSlice`) — `gameId`, `playerId`, `nickname`, `isHost`, `status`, `players`, `currentQuestion`, `lastResult`, `hasAnswered`
-- **TanStack Query** — Used for leaderboard REST fetches; available for game creation/validation
+- **TanStack Query** — Initialized but not actively used; intended for REST calls (game creation, validation)
 - No server state in Redux; no API calls inside components
 
 ## Engineering Rules (from CLAUDE-01.md)
