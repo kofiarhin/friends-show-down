@@ -35,6 +35,16 @@ function initSocket(io) {
             setExpiryTimer(gameId, WAITING_EXPIRY_MS);
           }
         } else if (game.status === "in-progress") {
+          const isHost = game.hostId === socket.id;
+          if (isHost && game.playState === "paused") {
+            io.to(gameId).emit("game:closed", { reason: "host_disconnected" });
+            deleteGame(gameId);
+          } else {
+            io.to(gameId).emit("players:updated", {
+              players: sanitizePlayers(game.players),
+            });
+          }
+        } else if (game.status === "ended") {
           io.to(gameId).emit("players:updated", {
             players: sanitizePlayers(game.players),
           });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function CountdownTimer({ timeLimit, startedAt }) {
+export default function CountdownTimer({ timeLimit }) {
   const [timeLeft, setTimeLeft] = useState(timeLimit);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function CountdownTimer({ timeLimit, startedAt }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [timeLimit, startedAt]);
+  }, [timeLimit]);
 
   const pct = (timeLeft / timeLimit) * 100;
   const color =

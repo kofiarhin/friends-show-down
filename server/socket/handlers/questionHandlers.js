@@ -10,6 +10,10 @@ function registerQuestionHandlers(io, socket) {
       return socket.emit("answer:rejected", { reason: "Game is not in progress." });
     }
 
+    if (game.playState === "paused") {
+      return socket.emit("answer:rejected", { reason: "Game is paused." });
+    }
+
     // Question number must match current (1-based)
     if (questionNumber !== game.session.current + 1) {
       return socket.emit("answer:rejected", { reason: "Question already over." });

@@ -14,6 +14,13 @@ function createGame(gameId, hostId) {
     currentQuestion: null,
     questionAnswered: false,
     questionSubmissions: new Set(),
+    questionTimer: null,
+    transitionTimer: null,
+    questionStartedAt: null,
+    playState: "running",
+    remainingTimeMs: null,
+    endReason: null,
+    lastRoundResults: null,
     expiryTimer: null,
   };
   games.set(gameId, game);

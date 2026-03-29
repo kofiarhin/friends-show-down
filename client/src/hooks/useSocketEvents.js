@@ -9,6 +9,12 @@ import {
   setCurrentQuestion,
   setQuestionResult,
   updateScores,
+  setPlayState,
+  setEndReason,
+  setLastRoundResults,
+  resumeQuestion,
+  resetRound,
+  resetGame,
 } from "../store/gameSlice";
 
 export function useSocketEvents(gameId) {
@@ -40,13 +46,29 @@ export function useSocketEvents(gameId) {
 
     function onGameEnd(payload) {
       dispatch(setStatus("ended"));
+      dispatch(setEndReason(payload.endReason ?? "completed"));
+      dispatch(setLastRoundResults(payload));
       dispatch(setQuestionResult(payload));
       if (gameId) navigate(`/game/${gameId}/results`);
     }
 
     function onGameClosed() {
-      dispatch(setStatus("idle"));
+      dispatch(resetGame());
       navigate("/");
+    }
+
+    function onGamePaused() {
+      dispatch(setPlayState("paused"));
+    }
+
+    function onGameResumed({ remainingTimeMs }) {
+      dispatch(resumeQuestion(Math.ceil(remainingTimeMs / 1000)));
+    }
+
+    function onGameRestarted({ players }) {
+      dispatch(resetRound());
+      dispatch(setPlayers(players));
+      if (gameId) navigate(`/game/${gameId}/lobby`);
     }
 
     socket.on("connect", onConnect);
@@ -56,8 +78,10 @@ export function useSocketEvents(gameId) {
     socket.on("question:end", onQuestionEnd);
     socket.on("game:end", onGameEnd);
     socket.on("game:closed", onGameClosed);
+    socket.on("game:paused", onGamePaused);
+    socket.on("game:resumed", onGameResumed);
+    socket.on("game:restarted", onGameRestarted);
 
-    // Sync playerId in case already connected
     if (socket.connected) {
       dispatch(setPlayerId(socket.id));
     }
@@ -70,6 +94,9 @@ export function useSocketEvents(gameId) {
       socket.off("question:end", onQuestionEnd);
       socket.off("game:end", onGameEnd);
       socket.off("game:closed", onGameClosed);
+      socket.off("game:paused", onGamePaused);
+      socket.off("game:resumed", onGameResumed);
+      socket.off("game:restarted", onGameRestarted);
     };
   }, [dispatch, navigate, gameId]);
 }

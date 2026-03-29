@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
@@ -6,32 +6,25 @@ import { useSocketEvents } from "../hooks/useSocketEvents";
 import { setHasAnswered } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
 import QuestionResultOverlay from "../components/QuestionResultOverlay";
+import HostControls from "../components/HostControls";
 
 export default function GameScreen() {
   const { gameId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { currentQuestion, lastQuestionResult, hasAnswered, nickname } =
+  const { currentQuestion, lastQuestionResult, hasAnswered, nickname, isHost, playState } =
     useSelector((s) => s.game);
-
-  const startedAtRef = useRef(Date.now());
 
   useSocketEvents(gameId);
 
-  // Guard: must have a question
   useEffect(() => {
     if (!nickname) {
       navigate(`/game/${gameId}/join`);
     }
   }, [nickname, gameId, navigate]);
 
-  // Reset startedAt ref when question changes
-  useEffect(() => {
-    startedAtRef.current = Date.now();
-  }, [currentQuestion?.questionNumber]);
-
   function handleAnswer(option) {
-    if (hasAnswered) return;
+    if (hasAnswered || playState === "paused") return;
     dispatch(setHasAnswered(true));
     socket.emit("answer:submit", {
       gameId,
@@ -49,14 +42,36 @@ export default function GameScreen() {
   }
 
   const { questionNumber, totalQuestions, question, timeLimit } = currentQuestion;
+  // Key forces CountdownTimer to remount when question changes or when resumed (timeLimit updates)
+  const timerKey = `${questionNumber}-${timeLimit}`;
+  const answersDisabled = hasAnswered || playState === "paused";
 
   return (
     <div className="relative min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
+      {/* Paused overlay */}
+      {playState === "paused" && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-sm gap-4">
+          <p className="text-3xl font-bold text-yellow-400">Game Paused</p>
+          {isHost ? (
+            <HostControls gameId={gameId} />
+          ) : (
+            <p className="text-gray-400 text-sm">Waiting for the host to resume…</p>
+          )}
+        </div>
+      )}
+
       {lastQuestionResult && (
         <QuestionResultOverlay result={lastQuestionResult} />
       )}
 
       <div className="w-full max-w-md flex flex-col gap-6">
+        {/* Host controls (running state only) */}
+        {isHost && playState === "running" && (
+          <div className="flex justify-end">
+            <HostControls gameId={gameId} />
+          </div>
+        )}
+
         {/* Session progress */}
         <div className="text-center">
           <p className="text-sm text-gray-400 uppercase tracking-widest">
@@ -65,10 +80,7 @@ export default function GameScreen() {
         </div>
 
         {/* Timer */}
-        <CountdownTimer
-          timeLimit={timeLimit}
-          startedAt={startedAtRef.current}
-        />
+        <CountdownTimer key={timerKey} timeLimit={timeLimit} />
 
         {/* Question */}
         <div className="bg-gray-800 rounded-2xl px-6 py-8 text-center">
@@ -81,7 +93,7 @@ export default function GameScreen() {
             <button
               key={opt}
               onClick={() => handleAnswer(opt)}
-              disabled={hasAnswered}
+              disabled={answersDisabled}
               className="py-4 px-3 rounded-xl bg-gray-700 hover:bg-indigo-600 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {opt}

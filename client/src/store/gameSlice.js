@@ -7,9 +7,12 @@ const initialState = {
   isHost: false,
   status: "idle", // idle | waiting | in-progress | ended
   players: [],
-  currentQuestion: null, // { questionNumber, totalQuestions, question, timeLeft }
+  currentQuestion: null, // { questionNumber, totalQuestions, question, timeLimit }
   lastQuestionResult: null, // { winnerId, winnerNickname, correctAnswer, scores }
   hasAnswered: false,
+  playState: "running",      // "running" | "paused"
+  endReason: null,           // "completed" | "host_ended" | null
+  lastRoundResults: null,    // snapshot object or null
 };
 
 const gameSlice = createSlice({
@@ -45,6 +48,7 @@ const gameSlice = createSlice({
       state.currentQuestion = action.payload;
       state.hasAnswered = false;
       state.lastQuestionResult = null;
+      state.playState = "running";
     },
     setQuestionResult(state, action) {
       state.lastQuestionResult = action.payload;
@@ -54,6 +58,32 @@ const gameSlice = createSlice({
     },
     setHasAnswered(state, action) {
       state.hasAnswered = action.payload;
+    },
+    setPlayState(state, action) {
+      state.playState = action.payload;
+    },
+    setEndReason(state, action) {
+      state.endReason = action.payload;
+    },
+    setLastRoundResults(state, action) {
+      state.lastRoundResults = action.payload;
+    },
+    resumeQuestion(state, action) {
+      // action.payload = timeLeft in seconds
+      if (state.currentQuestion) {
+        state.currentQuestion = { ...state.currentQuestion, timeLimit: action.payload };
+      }
+      state.playState = "running";
+    },
+    resetRound(state) {
+      return {
+        ...initialState,
+        gameId: state.gameId,
+        playerId: state.playerId,
+        nickname: state.nickname,
+        isHost: state.isHost,
+        status: "waiting",
+      };
     },
     resetGame() {
       return initialState;
@@ -71,6 +101,11 @@ export const {
   setCurrentQuestion,
   setQuestionResult,
   setHasAnswered,
+  setPlayState,
+  setEndReason,
+  setLastRoundResults,
+  resumeQuestion,
+  resetRound,
   resetGame,
 } = gameSlice.actions;
 

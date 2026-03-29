@@ -24,6 +24,11 @@ export default function LobbyScreen() {
     socket.emit("game:start", { gameId });
   }
 
+  function handleCancel() {
+    if (!window.confirm("Cancel the game and send everyone home?")) return;
+    socket.emit("game:end-early", { gameId });
+  }
+
   const connectedCount = players.filter((p) => p.connected).length;
 
   return (
@@ -47,15 +52,23 @@ export default function LobbyScreen() {
         </div>
 
         {isHost && (
-          <button
-            onClick={handleStart}
-            disabled={connectedCount < 2}
-            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-lg disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            {connectedCount < 2
-              ? `Waiting for players… (${connectedCount}/2)`
-              : "Start Game"}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={handleStart}
+              disabled={connectedCount < 2}
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-lg disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              {connectedCount < 2
+                ? `Waiting for players… (${connectedCount}/2)`
+                : "Start Game"}
+            </button>
+            <button
+              onClick={handleCancel}
+              className="w-full py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm text-gray-400 hover:text-white transition"
+            >
+              Cancel Game
+            </button>
+          </div>
         )}
 
         {!isHost && (
