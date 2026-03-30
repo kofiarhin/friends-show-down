@@ -193,8 +193,32 @@
 }
 
 .question-result-overlay__countdown {
-  animation: gameplay-count-pop 360ms var(--gameplay-ease-out);
-  text-shadow: 0 0 26px rgba(255, 255, 255, 0.15);
+  animation: gameplay-count-pop 420ms var(--gameplay-ease-out);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
+}
+
+.question-result-overlay__countdown[data-countdown-value="3"] {
+  color: rgb(74 222 128);
+  text-shadow: 0 0 40px rgba(74, 222, 128, 0.5), 0 0 80px rgba(74, 222, 128, 0.25);
+  animation: gameplay-count-pop 420ms var(--gameplay-ease-out), gameplay-count-glow-green 420ms ease-out;
+}
+
+.question-result-overlay__countdown[data-countdown-value="2"] {
+  color: rgb(250 204 21);
+  text-shadow: 0 0 40px rgba(250, 204, 21, 0.5), 0 0 80px rgba(250, 204, 21, 0.25);
+  animation: gameplay-count-pop 420ms var(--gameplay-ease-out), gameplay-count-glow-yellow 420ms ease-out;
+}
+
+.question-result-overlay__countdown[data-countdown-value="1"] {
+  color: rgb(248 113 113);
+  text-shadow: 0 0 40px rgba(248, 113, 113, 0.6), 0 0 80px rgba(248, 113, 113, 0.3);
+  animation: gameplay-count-pop 420ms var(--gameplay-ease-out), gameplay-count-glow-red 420ms ease-out;
+}
+
+.question-result-overlay__countdown[data-countdown-value="GO"] {
+  color: rgb(255 255 255);
+  text-shadow: 0 0 60px rgba(165, 180, 252, 0.8), 0 0 120px rgba(99, 102, 241, 0.5);
+  animation: gameplay-count-go 500ms var(--gameplay-ease-out);
 }
 
 .mini-leaderboard__row {
@@ -313,18 +337,61 @@
 @keyframes gameplay-count-pop {
   0% {
     opacity: 0;
-    transform: scale(0.7);
+    transform: scale(0.4);
   }
 
-  60% {
+  55% {
     opacity: 1;
-    transform: scale(1.08);
+    transform: scale(1.25);
+  }
+
+  80% {
+    transform: scale(0.95);
   }
 
   100% {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+@keyframes gameplay-count-go {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+    letter-spacing: 0.3em;
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+    letter-spacing: -0.02em;
+  }
+
+  75% {
+    transform: scale(0.92);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes gameplay-count-glow-green {
+  0% { filter: brightness(2.5) saturate(1.5); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes gameplay-count-glow-yellow {
+  0% { filter: brightness(2.5) saturate(1.5); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes gameplay-count-glow-red {
+  0% { filter: brightness(2.5) saturate(1.5); }
+  100% { filter: brightness(1) saturate(1); }
 }
 
 @keyframes gameplay-row-in {

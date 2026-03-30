@@ -81,13 +81,6 @@ export function useSocketEvents(gameId) {
     }
 
     function onRoundPhase(payload) {
-      dispatch(
-        setRoundPhase({
-          roundPhase: payload.roundPhase,
-          phaseStartedAt: payload.phaseStartedAt,
-          phaseEndsAt: payload.phaseEndsAt,
-        }),
-      );
       if (payload.lastResult) {
         dispatch(
           setQuestionResult({
@@ -99,6 +92,13 @@ export function useSocketEvents(gameId) {
           }),
         );
       }
+      dispatch(
+        setRoundPhase({
+          roundPhase: payload.roundPhase,
+          phaseStartedAt: payload.phaseStartedAt,
+          phaseEndsAt: payload.phaseEndsAt,
+        }),
+      );
     }
 
     function onChatMessage(payload) {
