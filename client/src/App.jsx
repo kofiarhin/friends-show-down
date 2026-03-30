@@ -5,10 +5,12 @@ import LobbyScreen from "./screens/LobbyScreen";
 import GameScreen from "./screens/GameScreen";
 import ResultsScreen from "./screens/ResultsScreen";
 import LeaderboardScreen from "./screens/LeaderboardScreen";
+import Header from "./components/Header";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/game/:gameId/join" element={<NameEntryScreen />} />

@@ -147,8 +147,54 @@
   animation: gameplay-fade-rise 260ms var(--gameplay-ease-out);
 }
 
+.question-result-overlay__countdown-steps {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.question-result-overlay__countdown-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(129, 140, 248, 0.22);
+  background: rgba(30, 41, 59, 0.55);
+  color: rgb(148 163 184);
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition:
+    transform 180ms var(--gameplay-ease-out),
+    opacity 180ms var(--gameplay-ease-in-out),
+    background-color 180ms var(--gameplay-ease-in-out),
+    border-color 180ms var(--gameplay-ease-in-out),
+    color 180ms var(--gameplay-ease-in-out),
+    box-shadow 220ms var(--gameplay-ease-in-out);
+}
+
+.question-result-overlay__countdown-step[data-step-state="pending"] {
+  opacity: 0.45;
+}
+
+.question-result-overlay__countdown-step[data-step-state="active"] {
+  color: rgb(255 255 255);
+  background: rgba(79, 70, 229, 0.9);
+  border-color: rgba(165, 180, 252, 0.8);
+  box-shadow: 0 0 0 1px rgba(165, 180, 252, 0.35), 0 0 24px rgba(79, 70, 229, 0.26);
+  transform: scale(1.08);
+}
+
+.question-result-overlay__countdown-step[data-step-state="complete"] {
+  color: rgb(224 231 255);
+  background: rgba(67, 56, 202, 0.45);
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
 .question-result-overlay__countdown {
   animation: gameplay-count-pop 360ms var(--gameplay-ease-out);
+  text-shadow: 0 0 26px rgba(255, 255, 255, 0.15);
 }
 
 .mini-leaderboard__row {

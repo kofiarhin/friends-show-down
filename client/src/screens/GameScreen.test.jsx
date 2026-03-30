@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import gameReducer from "../store/gameSlice";
 import GameScreen from "./GameScreen";
@@ -17,6 +17,10 @@ vi.mock("../socket", () => ({
     emit: (...args) => emitMock(...args),
   },
 }));
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 function buildState(overrides = {}) {
   return {
@@ -45,6 +49,8 @@ function buildState(overrides = {}) {
     endReason: null,
     lastRoundResults: null,
     startError: null,
+    chatMessages: [],
+    chatError: null,
     ...overrides,
   };
 }
@@ -70,8 +76,10 @@ function renderWithState(preloadedState) {
 }
 
 describe("GameScreen gameplay states", () => {
-  it("renders hype countdown text", () => {
-    const now = Date.now();
+  it("renders a 3, 2, 1 hype countdown sequence", () => {
+    vi.useFakeTimers();
+    const now = new Date("2026-03-30T12:00:00.000Z");
+    vi.setSystemTime(now);
 
     renderWithState(
       buildState({
@@ -82,12 +90,23 @@ describe("GameScreen gameplay states", () => {
           roundPhase: "question_result",
         },
         roundPhase: "question_hype",
-        phaseStartedAt: now,
-        phaseEndsAt: now + 2500,
+        phaseStartedAt: now.getTime(),
+        phaseEndsAt: now.getTime() + 3000,
       }),
     );
 
-    expect(screen.getByText("Get ready…")).toBeInTheDocument();
+    expect(screen.getByText("Get ready...")).toBeInTheDocument();
+    expect(screen.getByTestId("hype-countdown-display")).toHaveTextContent("3");
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId("hype-countdown-display")).toHaveTextContent("2");
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId("hype-countdown-display")).toHaveTextContent("1");
   });
 
   it("disables answer submission during hype", async () => {

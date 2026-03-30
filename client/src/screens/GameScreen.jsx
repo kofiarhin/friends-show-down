@@ -25,6 +25,7 @@ export default function GameScreen() {
     players,
     playState,
     roundPhase,
+    phaseStartedAt,
     phaseEndsAt,
     chatMessages,
     chatError,
@@ -133,6 +134,7 @@ export default function GameScreen() {
         <QuestionResultOverlay
           result={lastQuestionResult}
           roundPhase={roundPhase}
+          phaseStartedAt={phaseStartedAt}
           phaseEndsAt={phaseEndsAt}
           previousScores={previousScoresRef.current}
         />
