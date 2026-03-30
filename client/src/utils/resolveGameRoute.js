@@ -4,8 +4,9 @@ export function resolveGameRoute({
   status,
   currentQuestion,
   lastRoundResults,
+  isHydrated,
 }) {
-  if (!routeGameId) return null;
+  if (!routeGameId || !isHydrated) return null;
 
   if (!nickname) {
     return `/game/${routeGameId}/join`;

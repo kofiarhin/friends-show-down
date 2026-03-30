@@ -33,28 +33,36 @@ export function useSocketEvents(gameId) {
   const nicknameRef = useRef(nickname);
   const isHostRef = useRef(isHost);
   const hostTokenRef = useRef(hostToken);
-  const wasConnected = useRef(false);
-
-  useEffect(() => { nicknameRef.current = nickname; }, [nickname]);
-  useEffect(() => { isHostRef.current = isHost; }, [isHost]);
-  useEffect(() => { hostTokenRef.current = hostToken; }, [hostToken]);
 
   useEffect(() => {
+    nicknameRef.current = nickname;
+  }, [nickname]);
+  useEffect(() => {
+    isHostRef.current = isHost;
+  }, [isHost]);
+  useEffect(() => {
+    hostTokenRef.current = hostToken;
+  }, [hostToken]);
+
+  useEffect(() => {
+    function emitJoinIfPossible() {
+      if (!gameId || !nicknameRef.current) return;
+
+      const payload = { gameId, nickname: nicknameRef.current };
+      if (isHostRef.current && hostTokenRef.current) {
+        payload.hostToken = hostTokenRef.current;
+      }
+      socket.emit("game:join", payload);
+    }
+
     function onConnect() {
       dispatch(setPlayerId(socket.id));
-
-      if (wasConnected.current && nicknameRef.current && gameId) {
-        const payload = { gameId, nickname: nicknameRef.current };
-        if (isHostRef.current && hostTokenRef.current) {
-          payload.hostToken = hostTokenRef.current;
-        }
-        socket.emit("game:join", payload);
-      }
-      wasConnected.current = true;
+      emitJoinIfPossible();
     }
 
     function onLobbyUpdated({ players, genre }) {
       dispatch(setPlayers(players));
+      dispatch(setStatus("waiting"));
       if (genre !== undefined) dispatch(setGenre(genre));
     }
 
@@ -113,7 +121,6 @@ export function useSocketEvents(gameId) {
       dispatch(setLastRoundResults(payload));
       dispatch(setQuestionResult(payload));
       dispatch(clearHostOffline());
-      if (gameId) sessionStorage.removeItem(`fsd:hostToken:${gameId}`);
       if (payload.genre !== undefined) dispatch(setGenre(payload.genre));
       if (gameId) navigate(`/game/${gameId}/results`);
     }
@@ -124,12 +131,10 @@ export function useSocketEvents(gameId) {
 
     function onHostReconnected({ players } = {}) {
       dispatch(clearHostOffline());
-      if (gameId) sessionStorage.removeItem(`fsd:hostToken:${gameId}`);
       if (players) dispatch(setPlayers(players));
     }
 
     function onGameClosed() {
-      if (gameId) sessionStorage.removeItem(`fsd:hostToken:${gameId}`);
       dispatch(resetGame());
       navigate("/");
     }
@@ -178,7 +183,7 @@ export function useSocketEvents(gameId) {
 
     if (socket.connected) {
       dispatch(setPlayerId(socket.id));
-      wasConnected.current = true;
+      emitJoinIfPossible();
     }
 
     return () => {

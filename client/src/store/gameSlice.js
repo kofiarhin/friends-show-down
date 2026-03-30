@@ -22,12 +22,25 @@ const initialState = {
   chatMessages: [],
   chatError: null,
   hostOffline: false, // only applies during "waiting" status (lobby phase)
+  isHydrated: false,
 };
 
 const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
+    hydrateSession(state, action) {
+      const session = action.payload;
+      if (session) {
+        state.gameId = session.gameId;
+        state.nickname = session.nickname;
+        state.isHost = session.isHost === true;
+        state.hostToken = session.hostToken ?? null;
+        state.status = session.status ?? "idle";
+        state.genre = session.genre ?? null;
+      }
+      state.isHydrated = true;
+    },
     setGame(state, action) {
       const { gameId, playerId, nickname, isHost, hostToken, genre } =
         action.payload;
@@ -152,15 +165,20 @@ const gameSlice = createSlice({
         hostToken: state.hostToken,
         genre: state.genre,
         status: "waiting",
+        isHydrated: state.isHydrated,
       };
     },
-    resetGame() {
-      return initialState;
+    resetGame(state) {
+      return {
+        ...initialState,
+        isHydrated: state.isHydrated,
+      };
     },
   },
 });
 
 export const {
+  hydrateSession,
   setGame,
   setPlayerId,
   setStatus,
