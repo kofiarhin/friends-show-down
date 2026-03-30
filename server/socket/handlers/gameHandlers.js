@@ -2,6 +2,7 @@ const {
   getGame,
   getPlayerByNickname,
   addPlayer,
+  removePlayer,
   markDisconnected,
   markConnected,
   deleteGame,
@@ -290,6 +291,63 @@ function registerGameHandlers(io, socket) {
     setExpiryTimer(gameId, ENDED_EXPIRY_MS, () => {
       io.to(gameId).emit("game:closed", { reason: "expired" });
       deleteGame(gameId);
+    });
+  });
+
+  // game:leave — player voluntarily leaves the session
+  socket.on("game:leave", (payload) => {
+    const parsedPayload = parseGameIdPayload(payload);
+    if (!parsedPayload) {
+      return socket.emit("action:error", { message: "Invalid payload." });
+    }
+
+    const { gameId } = parsedPayload;
+    const game = getGame(gameId);
+    if (!game)
+      return socket.emit("action:error", { message: "Game not found." });
+
+    const player = game.players.find((p) => p.playerId === socket.id);
+    if (!player)
+      return socket.emit("action:error", {
+        message: "Player not found in game.",
+      });
+
+    const isHost = socket.id === game.hostId;
+    if (isHost) {
+      if (game.status === "waiting" || game.status === "in-progress") {
+        if (game.questionTimer) {
+          clearTimeout(game.questionTimer);
+          game.questionTimer = null;
+        }
+        if (game.transitionTimer) {
+          clearTimeout(game.transitionTimer);
+          game.transitionTimer = null;
+        }
+        io.to(gameId).emit("game:closed", { reason: "host_left" });
+        deleteGame(gameId);
+        return;
+      }
+
+      removePlayer(gameId, socket.id);
+      io.to(gameId).emit("players:updated", {
+        players: sanitizePlayers(game.players),
+      });
+      return;
+    }
+
+    removePlayer(gameId, socket.id);
+    socket.leave(gameId);
+
+    if (game.status === "waiting") {
+      io.to(gameId).emit("lobby:updated", {
+        players: sanitizePlayers(game.players),
+        genre: game.config.genre,
+      });
+      return;
+    }
+
+    io.to(gameId).emit("players:updated", {
+      players: sanitizePlayers(game.players),
     });
   });
 

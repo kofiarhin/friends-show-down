@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
-import { setHasAnswered, clearChatError } from "../store/gameSlice";
+import { setHasAnswered, clearChatError, resetGame } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
 import QuestionResultOverlay from "../components/QuestionResultOverlay";
 import HostControls from "../components/HostControls";
@@ -86,6 +86,13 @@ export default function GameScreen() {
     });
   }
 
+  function handleLeave() {
+    if (!window.confirm("Leave the game?")) return;
+    socket.emit("game:leave", { gameId });
+    dispatch(resetGame());
+    navigate("/");
+  }
+
   const chatEnabled =
     status === "waiting" ||
     status === "ended" ||
@@ -135,7 +142,7 @@ export default function GameScreen() {
         />
       )}
 
-      <div className="w-full max-w-6xl grid gap-6 md:grid-cols-[1.8fr_1fr]">
+      <div className="w-full max-w-2xl flex flex-col gap-6">
         <div
           className="gameplay-content w-full flex flex-col gap-6"
           data-paused={isPauseOverlayActive}
@@ -145,6 +152,15 @@ export default function GameScreen() {
               <HostControls gameId={gameId} />
             </div>
           )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleLeave}
+              className="py-2 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition"
+            >
+              Leave Game
+            </button>
+          </div>
 
           <div key={questionKey} className="question-stage flex flex-col gap-6">
             <div className="text-center">
@@ -193,9 +209,7 @@ export default function GameScreen() {
             </p>
           )}
         </div>
-      </div>
 
-      <div className="flex flex-col gap-6">
         <ChatDrawer
           enabled={chatEnabled}
           title="Game chat"

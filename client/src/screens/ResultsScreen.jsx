@@ -39,7 +39,8 @@ export default function ResultsScreen() {
   const showCelebration =
     !!winnerId && !isTie && endReason !== "host_ended" && topScore > 0;
 
-  function handlePlayAgain() {
+  function handleLeaveGame() {
+    socket.emit("game:leave", { gameId });
     dispatch(resetGame());
     navigate("/");
   }
@@ -121,7 +122,7 @@ export default function ResultsScreen() {
                 Waiting for host to start next round…
               </p>
               <button
-                onClick={handlePlayAgain}
+                onClick={handleLeaveGame}
                 className="w-full py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-semibold text-lg transition"
               >
                 Leave Game
@@ -149,22 +150,6 @@ export default function ResultsScreen() {
           {players.length - resultScores.length > 0
             ? `+${players.length - resultScores.length} player(s) joined after the round`
             : null}
-        </div>
-      )}
-
-      {isHost ? (
-        <HostPostGameControls gameId={gameId} genre={genre} />
-      ) : (
-        <div className="flex flex-col items-center gap-4 w-full max-w-sm">
-          <p className="text-center text-gray-500 text-sm">
-            Waiting for host to start next round…
-          </p>
-          <button
-            onClick={handlePlayAgain}
-            className="w-full py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-semibold text-lg transition"
-          >
-            Leave Game
-          </button>
         </div>
       )}
     </div>

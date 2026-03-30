@@ -3,13 +3,19 @@ const {
   getGame,
   addPlayer,
   updateScore,
+  removePlayer,
   markDisconnected,
   deleteGame,
 } = require("./gameStore");
 
 describe("gameStore", () => {
   const gameId = "test-game-1";
-  const player = { playerId: "p1", nickname: "Alice", score: 0, connected: true };
+  const player = {
+    playerId: "p1",
+    nickname: "Alice",
+    score: 0,
+    connected: true,
+  };
 
   beforeEach(() => {
     deleteGame(gameId);
@@ -56,5 +62,20 @@ describe("gameStore", () => {
     markDisconnected(gameId, "p1");
     const game = getGame(gameId);
     expect(game.players[0].connected).toBe(false);
+  });
+
+  it("removePlayer removes the matching player", () => {
+    createGame(gameId, "h1", "mixed");
+    addPlayer(gameId, { ...player });
+    const game = removePlayer(gameId, "p1");
+    expect(game.players).toHaveLength(0);
+    expect(getGame(gameId).players).toHaveLength(0);
+  });
+
+  it("removePlayer does nothing when the player is not found", () => {
+    createGame(gameId, "h1", "mixed");
+    addPlayer(gameId, { ...player });
+    const game = removePlayer(gameId, "unknown");
+    expect(game.players).toHaveLength(1);
   });
 });

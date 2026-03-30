@@ -110,6 +110,15 @@ function markConnected(gameId, playerId) {
   return game;
 }
 
+function removePlayer(gameId, playerId) {
+  const game = getGame(gameId);
+  if (!game) return null;
+  const index = game.players.findIndex((p) => p.playerId === playerId);
+  if (index === -1) return game;
+  game.players.splice(index, 1);
+  return game;
+}
+
 function setExpiryTimer(gameId, ms, onExpire) {
   const game = getGame(gameId);
   if (!game) return;
@@ -136,6 +145,7 @@ module.exports = {
   addPlayer,
   getPlayer,
   getPlayerByNickname,
+  removePlayer,
   updateScore,
   addChatMessage,
   getChatMessages,

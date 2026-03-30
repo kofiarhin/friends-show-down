@@ -61,7 +61,7 @@ export default function ChatPanel({
 
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-4 py-4 min-h-0 space-y-3"
+        className="flex-1 overflow-y-auto px-4 py-3 min-h-0 space-y-2"
       >
         {messages.length === 0 ? (
           <p className="text-xs text-gray-500">No messages yet.</p>
@@ -82,25 +82,25 @@ export default function ChatPanel({
                 className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-sm ${
+                  className={`max-w-[70%] rounded-2xl px-3 py-2 shadow-sm ${
                     isMine
                       ? "bg-indigo-600 text-white"
-                      : "bg-gray-800 text-gray-200"
+                      : "bg-slate-800 text-slate-100"
                   }`}
                 >
                   {!isMine && (
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-white">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-300">
                         {message.nickname}
                       </span>
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[10px] text-slate-400">
                         {timestamp}
                       </span>
                     </div>
                   )}
-                  <p className="text-sm leading-6">{message.message}</p>
+                  <p className="text-sm leading-5">{message.message}</p>
                   {isMine && (
-                    <div className="mt-2 text-right text-[10px] text-white/80">
+                    <div className="mt-1 text-right text-[10px] text-white/80">
                       {timestamp}
                     </div>
                   )}
