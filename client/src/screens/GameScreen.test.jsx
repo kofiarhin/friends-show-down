@@ -133,6 +133,21 @@ describe("GameScreen gameplay states", () => {
     expect(otherButton).toHaveAttribute("data-answer-state", "locked");
   });
 
+  it("opens and closes the chat drawer", async () => {
+    renderWithState(buildState());
+
+    const chatToggle = screen.getByRole("button", { name: /chat/i });
+    await userEvent.click(chatToggle);
+
+    const closeButtons = screen.getAllByRole("button", { name: /close/i });
+    expect(closeButtons.length).toBeGreaterThan(0);
+
+    await userEvent.click(closeButtons[0]);
+    expect(
+      screen.queryByRole("button", { name: /close/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the paused overlay state for players", () => {
     renderWithState(buildState({ playState: "paused" }));
 

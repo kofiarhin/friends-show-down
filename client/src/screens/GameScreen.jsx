@@ -7,7 +7,7 @@ import { setHasAnswered, clearChatError } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
 import QuestionResultOverlay from "../components/QuestionResultOverlay";
 import HostControls from "../components/HostControls";
-import ChatPanel from "../components/ChatPanel";
+import ChatDrawer from "../components/ChatDrawer";
 
 export default function GameScreen() {
   const { gameId } = useParams();
@@ -140,63 +140,63 @@ export default function GameScreen() {
           className="gameplay-content w-full flex flex-col gap-6"
           data-paused={isPauseOverlayActive}
         >
-        {isHost && playState === "running" && (
-          <div className="flex justify-end">
-            <HostControls gameId={gameId} />
-          </div>
-        )}
+          {isHost && playState === "running" && (
+            <div className="flex justify-end">
+              <HostControls gameId={gameId} />
+            </div>
+          )}
 
-        <div key={questionKey} className="question-stage flex flex-col gap-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-400 uppercase tracking-widest">
-              Question {questionNumber} of {totalQuestions}
+          <div key={questionKey} className="question-stage flex flex-col gap-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-400 uppercase tracking-widest">
+                Question {questionNumber} of {totalQuestions}
+              </p>
+            </div>
+
+            <CountdownTimer key={timerKey} timeLimit={timeLimit} />
+
+            <div className="question-card bg-gray-800 rounded-2xl px-6 py-8 text-center">
+              <p className="text-xl font-semibold leading-snug">
+                {question.prompt}
+              </p>
+            </div>
+
+            <div className="answer-grid grid grid-cols-2 gap-3">
+              {question.options.map((opt, index) => {
+                const answerState =
+                  selectedAnswer === opt
+                    ? "selected"
+                    : hasAnswered
+                      ? "locked"
+                      : "idle";
+
+                return (
+                  <button
+                    key={opt}
+                    onClick={() => handleAnswer(opt)}
+                    disabled={answersDisabled}
+                    data-answer-state={answerState}
+                    data-question-live={roundPhase === "question_live"}
+                    className="game-answer-button py-4 px-3 rounded-xl bg-gray-700 hover:bg-indigo-600 font-medium text-sm disabled:cursor-not-allowed"
+                    style={{ "--answer-index": index }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {hasAnswered && !lastQuestionResult && (
+            <p className="text-center text-gray-500 text-sm">
+              Answer submitted. Waiting for result…
             </p>
-          </div>
-
-          <CountdownTimer key={timerKey} timeLimit={timeLimit} />
-
-          <div className="question-card bg-gray-800 rounded-2xl px-6 py-8 text-center">
-            <p className="text-xl font-semibold leading-snug">
-              {question.prompt}
-            </p>
-          </div>
-
-          <div className="answer-grid grid grid-cols-2 gap-3">
-            {question.options.map((opt, index) => {
-              const answerState =
-                selectedAnswer === opt
-                  ? "selected"
-                  : hasAnswered
-                    ? "locked"
-                    : "idle";
-
-              return (
-                <button
-                  key={opt}
-                  onClick={() => handleAnswer(opt)}
-                  disabled={answersDisabled}
-                  data-answer-state={answerState}
-                  data-question-live={roundPhase === "question_live"}
-                  className="game-answer-button py-4 px-3 rounded-xl bg-gray-700 hover:bg-indigo-600 font-medium text-sm disabled:cursor-not-allowed"
-                  style={{ "--answer-index": index }}
-                >
-                  {opt}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {hasAnswered && !lastQuestionResult && (
-          <p className="text-center text-gray-500 text-sm">
-            Answer submitted. Waiting for result…
-          </p>
-        )}
+          )}
         </div>
       </div>
 
       <div className="flex flex-col gap-6">
-        <ChatPanel
+        <ChatDrawer
           enabled={chatEnabled}
           title="Game chat"
           currentUserId={playerId}
