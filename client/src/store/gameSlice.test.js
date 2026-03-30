@@ -11,6 +11,7 @@ import reducer, {
   setRoundPhase,
   setHasAnswered,
   resetGame,
+  hydrateSession,
 } from "./gameSlice";
 
 const initial = {
@@ -34,11 +35,36 @@ const initial = {
   startError: null,
   chatMessages: [],
   chatError: null,
+  hostOffline: false,
+  isHydrated: false,
 };
 
 describe("gameSlice", () => {
   it("returns initial state", () => {
     expect(reducer(undefined, { type: "@@INIT" })).toEqual(initial);
+  });
+
+
+  it("hydrateSession restores persisted session and marks hydrated", () => {
+    const state = reducer(
+      undefined,
+      hydrateSession({
+        gameId: "abc",
+        nickname: "Alice",
+        isHost: true,
+        hostToken: "token-123",
+        status: "waiting",
+        genre: "science",
+      }),
+    );
+
+    expect(state.gameId).toBe("abc");
+    expect(state.nickname).toBe("Alice");
+    expect(state.isHost).toBe(true);
+    expect(state.hostToken).toBe("token-123");
+    expect(state.status).toBe("waiting");
+    expect(state.genre).toBe("science");
+    expect(state.isHydrated).toBe(true);
   });
 
   it("setGame updates gameId, nickname, isHost, and hostToken", () => {
@@ -212,6 +238,6 @@ describe("gameSlice", () => {
       }),
     );
     const reset = reducer(dirty, resetGame());
-    expect(reset).toEqual(initial);
+    expect(reset).toEqual({ ...initial, isHydrated: false });
   });
 });

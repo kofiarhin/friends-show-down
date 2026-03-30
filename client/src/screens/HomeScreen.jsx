@@ -40,7 +40,6 @@ export default function HomeScreen() {
   const mutation = useMutation({
     mutationFn: createGame,
     onSuccess: (data, genre) => {
-      sessionStorage.setItem(`fsd:hostToken:${data.gameId}`, data.hostToken);
       dispatch(resetGame());
       dispatch(
         setGame({

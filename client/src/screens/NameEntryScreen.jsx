@@ -32,15 +32,6 @@ export default function NameEntryScreen() {
   useSocketEvents(gameId);
   useRouteGuard(gameId);
 
-  useEffect(() => {
-    if (isHost && !hostToken) {
-      const stored = sessionStorage.getItem(`fsd:hostToken:${gameId}`);
-      if (stored) {
-        dispatch(setGame({ hostToken: stored }));
-      }
-    }
-  }, [gameId, isHost, hostToken, dispatch]);
-
   const {
     data: gameData,
     error: gameError,

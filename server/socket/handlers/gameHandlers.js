@@ -223,10 +223,26 @@ function registerGameHandlers(io, socket) {
     const { gameId } = parsedPayload;
     const game = getGame(gameId);
 
-    if (!game) return;
-    if (game.hostId !== socket.id) return;
-    if (game.status !== "waiting") return;
-    if (game.players.filter((p) => p.connected).length < 2) return;
+    if (!game) {
+      return socket.emit("start:error", { message: "Game not found." });
+    }
+    if (game.hostId !== socket.id) {
+      return socket.emit("start:error", {
+        message: "Only the host can start the game.",
+      });
+    }
+    if (game.status !== "waiting") {
+      return socket.emit("start:error", {
+        message: "Game can only be started from the lobby.",
+      });
+    }
+
+    const connectedPlayers = game.players.filter((p) => p.connected).length;
+    if (connectedPlayers < 2) {
+      return socket.emit("start:error", {
+        message: "Need at least 2 connected players to start.",
+      });
+    }
 
     const genre = game.config.genre;
     const pool = getQuestionsByGenre(genre);
