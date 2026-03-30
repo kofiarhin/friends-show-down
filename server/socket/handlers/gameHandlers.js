@@ -408,8 +408,8 @@ function registerGameHandlers(io, socket) {
     game.phaseStartedAt = null;
     game.phaseEndsAt = null;
     game.questionSubmissions = new Set();
-    game.questionTimer = null;
-    game.transitionTimer = null;
+    if (game.questionTimer) { clearTimeout(game.questionTimer); game.questionTimer = null; }
+    if (game.transitionTimer) { clearTimeout(game.transitionTimer); game.transitionTimer = null; }
     game.questionStartedAt = null;
     game.playState = "running";
     game.remainingTimeMs = null;
@@ -655,7 +655,7 @@ function emitQuestion(io, gameId) {
 
 function endQuestion(io, gameId, winnerId, winnerNickname) {
   const game = getGame(gameId);
-  if (!game) return;
+  if (!game || game.status !== "in-progress") return;
 
   if (game.questionTimer) {
     clearTimeout(game.questionTimer);

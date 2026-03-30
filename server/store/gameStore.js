@@ -43,7 +43,11 @@ function getGame(gameId) {
 
 function deleteGame(gameId) {
   const game = games.get(gameId);
-  if (game && game.expiryTimer) clearTimeout(game.expiryTimer);
+  if (game) {
+    if (game.expiryTimer) clearTimeout(game.expiryTimer);
+    if (game.questionTimer) clearTimeout(game.questionTimer);
+    if (game.transitionTimer) clearTimeout(game.transitionTimer);
+  }
   games.delete(gameId);
 }
 

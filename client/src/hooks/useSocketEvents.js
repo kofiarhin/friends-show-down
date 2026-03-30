@@ -144,6 +144,7 @@ export function useSocketEvents(gameId) {
     }
 
     function onGameResumed({ remainingTimeMs }) {
+      dispatch(setPlayState("running"));
       dispatch(resumeQuestion(Math.ceil(remainingTimeMs / 1000)));
     }
 

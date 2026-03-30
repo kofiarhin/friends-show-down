@@ -6,7 +6,7 @@ function buildLeaderboardEntries(weekId, entries) {
   const sorted = [...entries.values()].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     if (b.wins !== a.wins) return b.wins - a.wins;
-    if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+    if (a.gamesPlayed !== b.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
     return a.playerName.localeCompare(b.playerName);
   });
 
