@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../socket";
+import { useSocketEvents } from "../hooks/useSocketEvents";
+import { useRouteGuard } from "../hooks/useRouteGuard";
 import { setGame, setPlayerId } from "../store/gameSlice";
 import { apiBase } from "../config";
 
@@ -26,6 +28,9 @@ export default function NameEntryScreen() {
   const [nickname, setNickname] = useState("");
   const [joinError, setJoinError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useSocketEvents(gameId);
+  useRouteGuard(gameId);
 
   const {
     data: gameData,

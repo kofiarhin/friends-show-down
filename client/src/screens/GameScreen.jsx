@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
+import { useRouteGuard } from "../hooks/useRouteGuard";
 import { setHasAnswered, clearChatError, resetGame } from "../store/gameSlice";
 import CountdownTimer from "../components/CountdownTimer";
 import QuestionResultOverlay from "../components/QuestionResultOverlay";
@@ -35,12 +36,7 @@ export default function GameScreen() {
   const previousScoresRef = useRef(players);
 
   useSocketEvents(gameId);
-
-  useEffect(() => {
-    if (!nickname) {
-      navigate(`/game/${gameId}/join`);
-    }
-  }, [nickname, gameId, navigate]);
+  useRouteGuard(gameId);
 
   useEffect(() => {
     if (!currentQuestion) return;

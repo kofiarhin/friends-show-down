@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
 import { useSocketEvents } from "../hooks/useSocketEvents";
+import { useRouteGuard } from "../hooks/useRouteGuard";
 import { clearChatError, resetGame } from "../store/gameSlice";
 import PlayerList from "../components/PlayerList";
 import ShareLink from "../components/ShareLink";
@@ -24,13 +25,7 @@ export default function LobbyScreen() {
   } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
-
-  // Guard: if no nickname registered, go to name entry
-  useEffect(() => {
-    if (!nickname) {
-      navigate(`/game/${gameId}/join`);
-    }
-  }, [nickname, gameId, navigate]);
+  useRouteGuard(gameId);
 
   function handleStart() {
     socket.emit("game:start", { gameId });

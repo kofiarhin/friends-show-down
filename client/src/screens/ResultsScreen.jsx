@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { socket } from "../socket";
 import { resetGame } from "../store/gameSlice";
 import { useSocketEvents } from "../hooks/useSocketEvents";
+import { useRouteGuard } from "../hooks/useRouteGuard";
 import FinalLeaderboard from "../components/FinalLeaderboard";
 import HostPostGameControls from "../components/HostPostGameControls";
 import ChatPanel from "../components/ChatPanel";
@@ -24,6 +25,7 @@ export default function ResultsScreen() {
   } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
+  useRouteGuard(gameId);
 
   // Fall back to live players if snapshot not yet set (shouldn't happen in practice)
   const resultScores = lastRoundResults?.scores ?? players;
