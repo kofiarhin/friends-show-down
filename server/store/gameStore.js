@@ -31,6 +31,7 @@ function createGame(gameId, hostId, genre, hostToken = null) {
     lastRoundResults: null,
     chatMessages: [],
     expiryTimer: null,
+    hostDisconnectedAt: null,
   };
   games.set(gameId, game);
   return game;
@@ -124,8 +125,8 @@ function setExpiryTimer(gameId, ms, onExpire) {
   if (!game) return;
   if (game.expiryTimer) clearTimeout(game.expiryTimer);
   game.expiryTimer = setTimeout(() => {
-    deleteGame(gameId);
     if (onExpire) onExpire();
+    deleteGame(gameId);
   }, ms);
 }
 

@@ -12,6 +12,7 @@ const {
 } = require("../store/gameStore");
 
 const WAITING_EXPIRY_MS = 30 * 60 * 1000;
+const HOST_RECONNECT_MS = 10 * 60 * 1000;
 
 function initSocket(io) {
   io.on("connection", (socket) => {
@@ -30,9 +31,12 @@ function initSocket(io) {
         if (game.status === "waiting") {
           const isHost = game.hostId === socket.id;
           if (isHost) {
-            // Host disconnected in lobby — close the session
-            io.to(gameId).emit("game:closed", { reason: "Host disconnected." });
-            deleteGame(gameId);
+            // Host disconnected in lobby — start grace period instead of closing immediately
+            game.hostDisconnectedAt = Date.now();
+            io.to(gameId).emit("host:offline", { reason: "disconnected" });
+            setExpiryTimer(gameId, HOST_RECONNECT_MS, () => {
+              io.to(gameId).emit("game:closed", { reason: "host_timeout" });
+            });
           } else {
             io.to(gameId).emit("lobby:updated", {
               players: sanitizePlayers(game.players),

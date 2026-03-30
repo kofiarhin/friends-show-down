@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { socket } from "../socket";
@@ -17,11 +16,11 @@ export default function LobbyScreen() {
     playerId,
     players,
     isHost,
-    nickname,
     genre,
     startError,
     chatMessages,
     chatError,
+    hostOffline,
   } = useSelector((s) => s.game);
 
   useSocketEvents(gameId);
@@ -49,6 +48,15 @@ export default function LobbyScreen() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 px-4">
+      {hostOffline && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="w-full max-w-7xl rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300"
+        >
+          Host disconnected. Waiting for them to return&hellip;
+        </div>
+      )}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-indigo-400">Lobby</h1>
         <p className="mt-1 text-gray-500 text-sm font-mono">Game: {gameId}</p>

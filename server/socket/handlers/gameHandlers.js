@@ -155,12 +155,22 @@ function registerGameHandlers(io, socket) {
 
       existing.playerId = socket.id;
       existing.connected = true;
-      if (wasHost) game.hostId = socket.id;
+      if (wasHost) {
+        game.hostId = socket.id;
+        game.hostDisconnectedAt = null;
+      }
 
       socket.join(gameId);
       emitChatHistory(socket, game);
       clearExpiryTimer(gameId);
       setExpiryTimer(gameId, WAITING_EXPIRY_MS);
+
+      if (wasHost) {
+        io.to(gameId).emit("host:reconnected", {
+          players: sanitizePlayers(game.players),
+        });
+      }
+
       io.to(gameId).emit("lobby:updated", {
         players: sanitizePlayers(game.players),
         genre: game.config.genre,

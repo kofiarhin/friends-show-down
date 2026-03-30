@@ -21,6 +21,7 @@ const initialState = {
   startError: null, // error message from start:error event | null
   chatMessages: [],
   chatError: null,
+  hostOffline: false, // only applies during "waiting" status (lobby phase)
 };
 
 const gameSlice = createSlice({
@@ -124,6 +125,12 @@ const gameSlice = createSlice({
     clearChatError(state) {
       state.chatError = null;
     },
+    setHostOffline(state) {
+      state.hostOffline = true;
+    },
+    clearHostOffline(state) {
+      state.hostOffline = false;
+    },
     resumeQuestion(state, action) {
       // action.payload = timeLeft in seconds
       if (state.currentQuestion) {
@@ -177,6 +184,8 @@ export const {
   resetGame,
   setGenre,
   setStartError,
+  setHostOffline,
+  clearHostOffline,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
