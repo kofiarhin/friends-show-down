@@ -1,11 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+const qrCodeSvgMock = vi.fn((props) => <svg data-testid="invite-qr" {...props} />);
+
+vi.mock("qrcode.react", () => ({
+  QRCodeSVG: (props) => qrCodeSvgMock(props),
+}));
+
 import ShareLink from "./ShareLink";
 
 describe("ShareLink", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    qrCodeSvgMock.mockClear();
   });
 
   it("renders room code, invite URL, and QR code", () => {
@@ -22,6 +30,16 @@ describe("ShareLink", () => {
       "https://friends.example/game/ABC123/join",
     );
     expect(screen.getByTestId("invite-qr")).toBeInTheDocument();
+    expect(qrCodeSvgMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        value: "https://friends.example/game/ABC123/join",
+        size: 224,
+        bgColor: "#FFFFFF",
+        fgColor: "#000000",
+        level: "Q",
+        includeMargin: true,
+      }),
+    );
   });
 
   it("copies invite URL to the clipboard", async () => {
