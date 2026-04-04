@@ -14,6 +14,7 @@ describe("gameSessionStorage", () => {
   it("persists and restores host session in same tab", () => {
     persistGameSession({
       gameId: "ROOM1",
+      gameUrl: "https://friends.example/game/ROOM1/join",
       nickname: "Host",
       isHost: true,
       hostToken: "token-1",
@@ -23,6 +24,7 @@ describe("gameSessionStorage", () => {
 
     expect(loadGameSession()).toEqual({
       gameId: "ROOM1",
+      gameUrl: "https://friends.example/game/ROOM1/join",
       nickname: "Host",
       isHost: true,
       hostToken: "token-1",
@@ -41,6 +43,7 @@ describe("gameSessionStorage", () => {
   it("clearGameSession removes persisted data", () => {
     persistGameSession({
       gameId: "ROOM1",
+      gameUrl: "https://friends.example/game/ROOM1/join",
       nickname: "Player",
       isHost: false,
       status: "waiting",

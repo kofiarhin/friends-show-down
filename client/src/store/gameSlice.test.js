@@ -16,6 +16,7 @@ import reducer, {
 
 const initial = {
   gameId: null,
+  gameUrl: null,
   playerId: null,
   nickname: null,
   isHost: false,
@@ -50,6 +51,7 @@ describe("gameSlice", () => {
       undefined,
       hydrateSession({
         gameId: "abc",
+        gameUrl: "https://example.com/game/abc/join",
         nickname: "Alice",
         isHost: true,
         hostToken: "token-123",
@@ -59,6 +61,7 @@ describe("gameSlice", () => {
     );
 
     expect(state.gameId).toBe("abc");
+    expect(state.gameUrl).toBe("https://example.com/game/abc/join");
     expect(state.nickname).toBe("Alice");
     expect(state.isHost).toBe(true);
     expect(state.hostToken).toBe("token-123");
@@ -72,12 +75,14 @@ describe("gameSlice", () => {
       undefined,
       setGame({
         gameId: "abc",
+        gameUrl: "https://example.com/game/abc/join",
         nickname: "Alice",
         isHost: true,
         hostToken: "token-123",
       }),
     );
     expect(state.gameId).toBe("abc");
+    expect(state.gameUrl).toBe("https://example.com/game/abc/join");
     expect(state.nickname).toBe("Alice");
     expect(state.isHost).toBe(true);
     expect(state.hostToken).toBe("token-123");

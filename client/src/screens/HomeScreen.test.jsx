@@ -95,7 +95,11 @@ describe("HomeScreen", () => {
 
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ gameId: "ROOM123", hostToken: "host-token" }),
+      json: async () => ({
+        gameId: "ROOM123",
+        gameUrl: "https://friends.example/game/ROOM123/join",
+        hostToken: "host-token",
+      }),
     });
 
     await user.click(screen.getByRole("button", { name: "Science" }));
@@ -116,6 +120,7 @@ describe("HomeScreen", () => {
     expect(store.getState().game).toMatchObject({
       gameId: "ROOM123",
       isHost: true,
+      gameUrl: "https://friends.example/game/ROOM123/join",
       hostToken: "host-token",
       genre: "science",
     });

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   gameId: null,
+  gameUrl: null,
   playerId: null,
   nickname: null,
   isHost: false,
@@ -33,6 +34,7 @@ const gameSlice = createSlice({
       const session = action.payload;
       if (session) {
         state.gameId = session.gameId;
+        state.gameUrl = session.gameUrl ?? null;
         state.nickname = session.nickname;
         state.isHost = session.isHost === true;
         state.hostToken = session.hostToken ?? null;
@@ -42,9 +44,10 @@ const gameSlice = createSlice({
       state.isHydrated = true;
     },
     setGame(state, action) {
-      const { gameId, playerId, nickname, isHost, hostToken, genre } =
+      const { gameId, gameUrl, playerId, nickname, isHost, hostToken, genre } =
         action.payload;
       state.gameId = gameId;
+      if (gameUrl !== undefined) state.gameUrl = gameUrl;
       if (playerId !== undefined) state.playerId = playerId;
       if (nickname !== undefined) state.nickname = nickname;
       if (isHost !== undefined) state.isHost = isHost;
@@ -159,6 +162,7 @@ const gameSlice = createSlice({
       return {
         ...initialState,
         gameId: state.gameId,
+        gameUrl: state.gameUrl,
         playerId: state.playerId,
         nickname: state.nickname,
         isHost: state.isHost,

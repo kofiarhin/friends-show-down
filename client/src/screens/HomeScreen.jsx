@@ -44,6 +44,7 @@ export default function HomeScreen() {
       dispatch(
         setGame({
           gameId: data.gameId,
+          gameUrl: data.gameUrl,
           isHost: true,
           hostToken: data.hostToken,
           genre,

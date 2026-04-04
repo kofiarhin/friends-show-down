@@ -39,6 +39,7 @@ export function loadGameSession() {
 
     return {
       gameId,
+      gameUrl: sanitizeString(parsed.gameUrl),
       nickname,
       isHost,
       hostToken,
@@ -64,9 +65,11 @@ export function persistGameSession(gameState) {
 
   const payload = {
     gameId,
+    gameUrl: sanitizeString(gameState?.gameUrl),
     nickname,
     isHost: gameState?.isHost === true,
-    hostToken: gameState?.isHost === true ? sanitizeString(gameState?.hostToken) : null,
+    hostToken:
+      gameState?.isHost === true ? sanitizeString(gameState?.hostToken) : null,
     status: sanitizeStatus(gameState?.status),
     genre: sanitizeString(gameState?.genre),
   };

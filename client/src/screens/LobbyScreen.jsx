@@ -15,6 +15,7 @@ export default function LobbyScreen() {
   const {
     playerId,
     players,
+    gameUrl,
     isHost,
     genre,
     startError,
@@ -77,8 +78,7 @@ export default function LobbyScreen() {
           </div>
 
           <div>
-            <p className="text-sm text-gray-400 mb-2">Share link</p>
-            <ShareLink gameId={gameId} />
+            <ShareLink gameId={gameId} gameUrl={gameUrl} />
           </div>
 
           {isHost && (

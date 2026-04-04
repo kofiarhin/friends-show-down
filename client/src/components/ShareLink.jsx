@@ -1,29 +1,71 @@
 import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
-export default function ShareLink({ gameId }) {
+export default function ShareLink({ gameId, gameUrl }) {
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/game/${gameId}/join`;
+  const [copyError, setCopyError] = useState("");
 
   function handleCopy() {
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    if (!gameUrl) return;
+
+    navigator.clipboard
+      .writeText(gameUrl)
+      .then(() => {
+        setCopyError("");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        setCopied(false);
+        setCopyError("Could not copy link. Please copy it manually.");
+      });
   }
 
   return (
-    <div className="flex items-center gap-2 w-full">
-      <input
-        readOnly
-        value={url}
-        className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 focus:outline-none"
-      />
-      <button
-        onClick={handleCopy}
-        className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium transition"
-      >
-        {copied ? "Copied!" : "Copy"}
-      </button>
+    <div className="w-full rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
+        Invite players
+      </p>
+
+      <div className="mt-3">
+        <p className="text-sm text-gray-400">Room code</p>
+        <p className="text-2xl font-bold tracking-wider text-white">{gameId}</p>
+      </div>
+
+      <div className="mt-4 flex w-full items-center gap-2">
+        <input
+          readOnly
+          value={gameUrl || ""}
+          aria-label="Invite URL"
+          placeholder="Invite link unavailable"
+          className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-300 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={handleCopy}
+          disabled={!gameUrl}
+          className="rounded-lg bg-gray-700 px-3 py-2 text-sm font-medium transition hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+
+      {copyError && (
+        <p role="alert" className="mt-2 text-sm text-amber-300">
+          {copyError}
+        </p>
+      )}
+
+      {gameUrl && (
+        <div className="mt-5 flex flex-col items-center gap-2">
+          <div className="rounded-lg bg-white p-3">
+            <QRCodeSVG value={gameUrl} size={160} data-testid="invite-qr" />
+          </div>
+          <p className="text-sm text-gray-400">
+            Scan with your phone camera to join instantly
+          </p>
+        </div>
+      )}
     </div>
   );
 }
