@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
+const QR_SIZE = 224;
+
 export default function ShareLink({ gameId, gameUrl }) {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
@@ -58,8 +60,16 @@ export default function ShareLink({ gameId, gameUrl }) {
 
       {gameUrl && (
         <div className="mt-5 flex flex-col items-center gap-2">
-          <div className="rounded-lg bg-white p-3">
-            <QRCodeSVG value={gameUrl} size={160} data-testid="invite-qr" />
+          <div className="rounded-lg bg-white p-4 shadow-sm shadow-black/30">
+            <QRCodeSVG
+              value={gameUrl}
+              size={QR_SIZE}
+              bgColor="#FFFFFF"
+              fgColor="#000000"
+              level="Q"
+              includeMargin
+              data-testid="invite-qr"
+            />
           </div>
           <p className="text-sm text-gray-400">
             Scan with your phone camera to join instantly
